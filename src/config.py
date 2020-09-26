@@ -1,4 +1,4 @@
 class Config:
     SPOTIFY_CLIENT_ID = ''
     SPOTIFY_CLIENT_SECRET = ''
-    SPOTIFY_CLIENT_TOKEN = ''
+    SPOTIFY_REFRESH_TOKEN = ''
