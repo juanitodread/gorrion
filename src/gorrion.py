@@ -15,5 +15,5 @@ class Gorrion:
 
 
 if __name__ == "__main__":
-   gorrion = Gorrion()
-   gorrion.run()
+    gorrion = Gorrion()
+    gorrion.run()
