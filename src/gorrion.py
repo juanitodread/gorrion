@@ -9,10 +9,11 @@ class Gorrion:
             Config.SPOTIFY_CLIENT_SECRET,
             Config.SPOTIFY_REFRESH_TOKEN,
         )
+
         current_track = spotify.get_current_track()
         print('CURRENT_TRACK: ', current_track)
 
 
 if __name__ == "__main__":
-    gorrion = Gorrion()
-    gorrion.run()
+   gorrion = Gorrion()
+   gorrion.run()

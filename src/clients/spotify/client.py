@@ -5,7 +5,7 @@ import requests
 
 from src.config import Config
 from src.clients.spotify.models import Track, Album, Artist
-from src.clients.spotify.errors import NotPlayingError
+from src.clients.spotify.errors import ServiceError, NotPlayingError
 
 
 class Spotify:
@@ -33,7 +33,7 @@ class Spotify:
         )
 
         if response.status_code != 200:
-            raise Exception(f'Error: Response error from Spotify API => {response.text}')
+            raise ServiceError(response.text)
 
         json_response = response.json()
         
@@ -50,7 +50,7 @@ class Spotify:
         )
         
         if response.status_code not in (200, 204):
-            raise Exception(f'Error: Response error from Spotify API => {response.text}')
+            raise ServiceError(response.text)
         
         if response.status_code == 204:
             raise NotPlayingError()
