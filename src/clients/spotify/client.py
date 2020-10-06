@@ -22,7 +22,7 @@ class Spotify:
         authorization = self.get_basic_auth_token()
 
         response = requests.post(
-            f'{Spotify.API_TOKEN_URL}',
+            Spotify.API_TOKEN_URL,
             headers={
                 'Authorization': f'Basic {authorization}'
             },
@@ -62,6 +62,7 @@ class Spotify:
             name=json_response['item']['name'],
             href=json_response['item']['href'],
             track_number=json_response['item']['track_number'],
+            public_url=json_response['item']['external_urls']['spotify'],
             album=Album(
                 id_=json_response['item']['album']['id'],
                 name=json_response['item']['album']['name'],

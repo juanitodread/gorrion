@@ -43,7 +43,7 @@ class Gorrion:
                f'\nAlbum: {track.album.name}'
                f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
                f'\n\n#gorrion #NowPlaying {self.get_artists_hashtag(track.artists)}'
-               f'\n\n{track.href.replace("api.spotify.com/v1/tracks", "open.spotify.com/track")}')
+               f'\n\n{track.public_url}')
 
     def short_status(self, track: Track) -> str:
         return ('Now listening 🔊🎶: \n'
@@ -51,7 +51,7 @@ class Gorrion:
                f'\nAlbum: {track.album.name}'
                f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
                f'\n\n#gorrion #NowPlaying'
-               f'\n\n{track.href.replace("api.spotify.com/v1/tracks", "open.spotify.com/track")}')
+               f'\n\n{track.public_url}')
 
     def get_artists_hashtag(self, artists: list) -> str:
         artists_hashtag = [self.to_hashtag(artist.name) 
