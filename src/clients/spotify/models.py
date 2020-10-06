@@ -21,5 +21,6 @@ class Artist(Entity):
 @dataclass
 class Track(Entity):
     track_number: int
+    public_url: str
     album: Album
     artists: list

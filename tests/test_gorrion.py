@@ -29,7 +29,7 @@ class TestGorrion:
     @patch('builtins.print')
     def test_playing_full_status(self, print_mock, spotify_mock):
         get_current_track_mock = MagicMock(return_value=Track(
-            '1', 'Peligro', '', 1,
+            '1', 'Peligro', '', 1, '',
             Album('11', 'Pa morirse de amor', '', '2006-01-01'),
             [
                 Artist('12', 'Ely Guerra', '')
@@ -50,7 +50,11 @@ class TestGorrion:
     @patch('builtins.print')
     def test_playing_short_status(self, print_mock, spotify_mock):
         get_current_track_mock = MagicMock(return_value=Track(
-            '1', 'Barcelona, Ciutat Refugi', 'https://api.spotify.com/v1/tracks/72NWtDFShJ2gVVVL41UlHZ', 3,
+            '1',
+            'Barcelona, Ciutat Refugi', 
+            'https://api.spotify.com/v1/tracks/72NWtDFShJ2gVVVL41UlHZ', 
+            3,
+            'https://open.spotify.com/track/72NWtDFShJ2gVVVL41UlHZ',
             Album('11', 'Black is beltza ASM Sessions', '', '2006-01-01'),
             [
                 Artist('12', 'Fermin Muguruza', ''),
@@ -95,7 +99,7 @@ class TestGorrion:
     @patch('src.gorrion.Twitter')
     def test_playing_enable_twitter(self, twitter_mock, spotify_mock):
         get_current_track_mock = MagicMock(return_value=Track(
-            '1', 'Peligro', '', 1,
+            '1', 'Peligro', '', 1, '',
             Album('11', 'Pa morirse de amor', '', '2006-01-01'),
             [
                 Artist('12', 'Ely Guerra', '')

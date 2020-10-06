@@ -46,6 +46,9 @@ class TestSpotify:
                 'name': 'Peligro',
                 'href': '',
                 'track_number': 1,
+                'external_urls': {
+                    'spotify': 'https://open.spotify.com/track/0KSsZsTzIpqTRtbMaI67k1',
+                },
                 'album': {
                     'id': '11',
                     'name': 'Pa morirse de amor',
@@ -67,7 +70,7 @@ class TestSpotify:
         track = spotify.get_current_track()
 
         assert track == Track(
-            '1', 'Peligro', '', 1,
+            '1', 'Peligro', '', 1, 'https://open.spotify.com/track/0KSsZsTzIpqTRtbMaI67k1',
             Album('11', 'Pa morirse de amor', '', '2006-01-01'),
             [
                 Artist('12', 'Ely Guerra', '')
