@@ -3,6 +3,7 @@ import argparse
 
 from src.config import Config
 from src.clients.spotify.client import Spotify
+from src.clients.spotify.models import Track
 from src.clients.twitter.client import Twitter
 
 
@@ -22,20 +23,45 @@ class Gorrion:
 
     def playing(self, disable_twitter: bool=False) -> None:
         current_track = self._spotify.get_current_track()
+        
+        status = self.full_status(current_track)
 
-        current_track_text = ('Now listening 🎶🔊: \n'
-                             f'\nTrack: {current_track.track_number}. {current_track.name}'
-                             f'\nAlbum: {current_track.album.name}'
-                             f'\nArtist: {", ".join([artist.name for artist in current_track.artists])}'
-                             '\n\n#gorrion #NowPlaying'
-                             f'\n\n{current_track.href.replace("api.spotify.com/v1/tracks", "open.spotify.com/track")}')
+        if len(status) > self._twitter.max_tweet_length:
+            print('(Using short status)')
+            status = self.short_status(current_track)
 
-        print(current_track_text)
+        print(status)
 
         if not disable_twitter:
-            post = self._twitter.post(current_track_text)
+            post = self._twitter.post(status)
             if post:
                 print('Status synced on Twitter')
+
+    def full_status(self, track: Track) -> str:
+        return ('Now listening 🔊🎶: \n'
+               f'\nTrack: {track.track_number}. {track.name}'
+               f'\nAlbum: {track.album.name}'
+               f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
+               f'\n\n#gorrion #NowPlaying {self.get_artists_hashtag(track.artists)}'
+               f'\n\n{track.href.replace("api.spotify.com/v1/tracks", "open.spotify.com/track")}')
+
+    def short_status(self, track: Track) -> str:
+        return ('Now listening 🔊🎶: \n'
+               f'\nTrack: {track.track_number}. {track.name}'
+               f'\nAlbum: {track.album.name}'
+               f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
+               f'\n\n#gorrion #NowPlaying'
+               f'\n\n{track.href.replace("api.spotify.com/v1/tracks", "open.spotify.com/track")}')
+
+    def get_artists_hashtag(self, artists: list) -> str:
+        artists_hashtag = [self.to_hashtag(artist.name) 
+                           for artist in artists]
+        return ' '.join(artists_hashtag)
+
+    def to_hashtag(self, text: str) -> str:
+        words = ''.join(text.split(' '))
+        words = words.replace('-', '')
+        return f'#{words}'
 
 
 def parse_args():

@@ -21,3 +21,7 @@ class Twitter:
         status = self._client.update_status(tweet)
 
         return status
+
+    @property
+    def max_tweet_length(self) -> int:
+        return 280
