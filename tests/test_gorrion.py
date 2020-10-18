@@ -88,15 +88,17 @@ class TestGorrion:
                                    'Artist: Fermin Muguruza, Chalart58, Chrishira Perrier, Ashlin Parker, Vic Navarrete\n\n'
                                    '#gorrion #NowPlaying\n\nhttps://open.spotify.com/track/72NWtDFShJ2gVVVL41UlHZ')
 
+    @patch('src.gorrion.Musixmatch')
     @patch('src.gorrion.Spotify')
     @patch('src.gorrion.Twitter')
-    def test_playing_disable_twitter(self, twitter_mock, spotify_mock):
+    def test_playing_disable_twitter(self, twitter_mock, spotify_mock, musixmatch_mock):
         get_current_track_mock = MagicMock()
         twitter_post_mock = MagicMock()
 
         spotify_mock.return_value.get_current_track = get_current_track_mock
         twitter_mock.return_value.post = twitter_post_mock
         twitter_mock.return_value.max_tweet_length = 280
+        musixmatch_mock.return_value.search_song.return_value = ('1', '2')
 
         gorrion = Gorrion()
         gorrion.playing(disable_twitter=True)
@@ -104,9 +106,10 @@ class TestGorrion:
         get_current_track_mock.assert_called_once_with()
         twitter_post_mock.assert_not_called()
 
+    @patch('src.gorrion.Musixmatch')
     @patch('src.gorrion.Spotify')
     @patch('src.gorrion.Twitter')
-    def test_playing_enable_twitter(self, twitter_mock, spotify_mock):
+    def test_playing_enable_twitter(self, twitter_mock, spotify_mock, musixmatch_mock):
         get_current_track_mock = MagicMock(return_value=Track(
             '1', 'Peligro', '', 1, '',
             Album('11', 'Pa morirse de amor', '', '2006-01-01'),
@@ -119,6 +122,7 @@ class TestGorrion:
         spotify_mock.return_value.get_current_track = get_current_track_mock
         twitter_mock.return_value.post = twitter_post_mock
         twitter_mock.return_value.max_tweet_length = 280
+        musixmatch_mock.return_value.search_song.return_value = ('1', '2')
 
         gorrion = Gorrion()
         gorrion.playing()
