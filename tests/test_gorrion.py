@@ -43,7 +43,7 @@ class TestGorrion:
         ))
 
         spotify_mock.return_value.get_current_track = get_current_track_mock
-        musixmatch_mock.return_value.search_lyric.return_value = ('1', '2')
+        musixmatch_mock.return_value.search_song.return_value = ('1', '2')
 
         gorrion = Gorrion()
         gorrion.playing(disable_twitter=True)
@@ -74,7 +74,7 @@ class TestGorrion:
         ))
 
         spotify_mock.return_value.get_current_track = get_current_track_mock
-        musixmatch_mock.return_value.search_lyric.return_value = ('1', '2')
+        musixmatch_mock.return_value.search_song.return_value = ('1', '2')
 
         gorrion = Gorrion()
         gorrion.playing(disable_twitter=True)

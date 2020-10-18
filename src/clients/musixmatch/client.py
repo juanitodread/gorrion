@@ -1,4 +1,13 @@
+import re
+
 import requests
+
+from src.clients.musixmatch.errors import (
+    SongNotFound,
+    ServiceError,
+    LyricNotFound,
+    LyricNotProvidedYet,
+)
 
 
 class Musixmatch:
@@ -7,7 +16,7 @@ class Musixmatch:
     def __init__(self, api_key: str) -> None:
         self._api_key = api_key
 
-    def search_lyric(self, song: str, artist: str) -> str:
+    def search_song(self, song: str, artist: str) -> str:
         response = requests.get(
             f'{Musixmatch.API_URL}/track.search',
             params={
@@ -19,17 +28,23 @@ class Musixmatch:
         )
 
         json_response = response.json()
-        body = json_response['message']['body']
 
-        track_id = body['track_list'][0]['track']['track_id']
-        common_track_id = body['track_list'][0]['track']['commontrack_id']
-        track_name = body['track_list'][0]['track']['track_name']
-        album = body['track_list'][0]['track']['album_name']
-        artist = body['track_list'][0]['track']['artist_name']
+        status_code = json_response['message']['header']['status_code']
+
+        if status_code != 200:
+            if status_code == 404:
+                raise SongNotFound(song, artist)
+            raise ServiceError(status_code)
+
+        body = json_response['message']['body']
+        track = body['track_list'][0]['track']
+
+        track_id = track['track_id']
+        common_track_id = track['commontrack_id']
 
         return (track_id, common_track_id)
 
-    def fetch_lyric(self, track_id: str, common_track_id: str) -> str:
+    def fetch_lyric(self, track_id: str, common_track_id: str) -> list:
         response = requests.get(
             f'{Musixmatch.API_URL}/track.lyrics.get',
             params={
@@ -40,7 +55,22 @@ class Musixmatch:
         )
 
         json_response = response.json()
-        lyric = json_response['message']['body']['lyrics']['lyrics_body']
+
+        print('JSON', json_response)
+
+        status_code = json_response['message']['header']['status_code']
+
+        if status_code != 200:
+            if status_code == 404:
+                raise LyricNotFound(track_id, common_track_id)
+            raise ServiceError(status_code)
+
+        body = json_response['message']['body']
+
+        if body == []:
+            raise LyricNotProvidedYet(track_id, common_track_id)
+
+        lyric = body['lyrics']['lyrics_body']
 
         paragraphs = self._build_lyric(lyric)
 
@@ -50,6 +80,7 @@ class Musixmatch:
         # remove metadata text
         lyric = raw_lyric.replace('******* This Lyrics is NOT for Commercial use *******', '')
         lyric = lyric.replace('...', '')
+        lyric = re.sub(r'\([0-9]+\)', '', lyric)
 
         raw_paragraphs = lyric.split('\n\n')
 

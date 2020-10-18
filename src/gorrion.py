@@ -37,7 +37,7 @@ class Gorrion:
 
         print(status)
 
-        track_id, common_track_id = self._musixmatch.search_lyric(current_track.name, current_track.artists[0].name)
+        track_id, common_track_id = self._musixmatch.search_song(current_track.name, current_track.artists[0].name)
         lyric = self._musixmatch.fetch_lyric(track_id, common_track_id)
         lyric_tweets = self.lyrics_to_tweets(lyric)
 
@@ -48,7 +48,6 @@ class Gorrion:
                 print('Status synced on Twitter')
             
             for tweet in lyric_tweets:
-                #time.sleep(3)
                 print(f'{tweet}\n')
                 post = self._twitter.reply(tweet, post.id)
         else:
