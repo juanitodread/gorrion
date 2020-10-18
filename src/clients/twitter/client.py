@@ -1,4 +1,4 @@
-from tweepy import OAuthHandler, API
+from tweepy import OAuthHandler, API, Status
 
 
 class Twitter:
@@ -17,8 +17,13 @@ class Twitter:
 
         self._client = API(auth)
 
-    def post(self, tweet: str):
+    def post(self, tweet: str) -> Status:
         status = self._client.update_status(tweet)
+
+        return status
+
+    def reply(self, tweet: str, tweet_id: int) -> Status:
+        status = self._client.update_status(tweet, in_reply_to_status_id=tweet_id)
 
         return status
 
