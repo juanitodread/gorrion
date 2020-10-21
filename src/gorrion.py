@@ -37,9 +37,13 @@ class Gorrion:
 
         print(status)
 
-        track_id, common_track_id = self._musixmatch.search_song(current_track.name, current_track.artists[0].name)
-        lyric = self._musixmatch.fetch_lyric(track_id, common_track_id)
-        lyric_tweets = self.lyrics_to_tweets(lyric)
+        song = self._musixmatch.search_song(
+            current_track.name,
+            current_track.artists[0].name,
+            current_track.album.name
+        )
+        song = self._musixmatch.fetch_lyric(song)
+        lyric_tweets = self.lyrics_to_tweets(song.lyric.content)
 
         print('Lyric:')
         if not disable_twitter:

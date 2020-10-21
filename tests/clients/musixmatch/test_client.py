@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from src.clients.musixmatch.client import Musixmatch
+from src.clients.musixmatch.models import Song, Track, Lyric
 from src.clients.musixmatch.errors import (
     SongNotFound,
     ServiceError,
@@ -32,6 +33,8 @@ class TestMusixmatch:
                                     'track_id': '123',
                                     'commontrack_id': '456',
                                     'track_name': 'Cumbiera Intelectual',
+                                    'instrumental': 0,
+                                    'explicit': 0,
                                     'album_name': 'Mi querido Brasil',
                                     'artist_name': 'Kevin Johansen',
                                 }
@@ -43,10 +46,26 @@ class TestMusixmatch:
         )
         
         musixmatch = Musixmatch('api_key')
-        track_id, common_track_id = musixmatch.search_song('Cumbiera Intelectual', 'Kevin Johansen')
+        song = musixmatch.search_song('Cumbiera Intelectual', 'Kevin Johansen', 'Mi querido Brasil')
 
-        assert track_id == '123'
-        assert common_track_id == '456'
+        assert song == Song(
+            name='Cumbiera Intelectual',
+            artist='Kevin Johansen',
+            album='Mi querido Brasil',
+            tracks=[
+                Track(
+                    id_='123',
+                    common_id='456',
+                    name='Cumbiera Intelectual',
+                    instrumental=0,
+                    explicit=0,
+                    artist='Kevin Johansen',
+                    album='Mi querido Brasil'
+                )
+            ],
+            tracks_length=1,
+            lyric=None
+        )
 
     @patch('src.clients.musixmatch.client.requests')
     def test_search_song_when_song_not_found(self, requests_mock):
@@ -65,9 +84,10 @@ class TestMusixmatch:
         musixmatch = Musixmatch('api_key')
 
         with pytest.raises(SongNotFound) as error:
-            track_id, common_track_id = musixmatch.search_song('Cumbiera No Intelectual', 'Kevin Johansen')
+            track_id, common_track_id = musixmatch.search_song('Cumbiera No Intelectual', 'Kevin Johansen', 'En Vivo')
 
-        assert str(error.value) == 'Song not found: song=Cumbiera No Intelectual, artist=Kevin Johansen'
+        assert str(error.value) == ("Song not found: song=Song(name='Cumbiera No Intelectual', artist='Kevin "
+                                    "Johansen', album='En Vivo', tracks=None, tracks_length=0, lyric=None)")
 
     @patch('src.clients.musixmatch.client.requests')
     def test_search_song_when_service_error(self, requests_mock):
@@ -86,7 +106,7 @@ class TestMusixmatch:
         musixmatch = Musixmatch('api_key')
 
         with pytest.raises(ServiceError) as error:
-            track_id, common_track_id = musixmatch.search_song('Cumbiera Intelectual', 'Kevin Johansen')
+            track_id, common_track_id = musixmatch.search_song('Cumbiera Intelectual', 'Kevin Johansen', 'En Vivo')
 
         assert str(error.value) == 'Response API error: response="500"'
 
@@ -108,9 +128,18 @@ class TestMusixmatch:
         )
         
         musixmatch = Musixmatch('api_key')
-        lyrics = musixmatch.fetch_lyric('123', '456')
+        song = musixmatch.fetch_lyric(Song(
+            'Cumbiera Intelectual',
+            'Kevin Johansen',
+            'En Vivo', 
+            [
+                Track('123', '456', 'Gotita de mezcal', 0, 0, '', '')
+            ], 
+            1, 
+            Lyric('987', '123', '456', ['Gotita de mezcal']))
+        )
 
-        assert lyrics == ['Gotita de mezcal']
+        assert song.lyric == Lyric('987', '123', '456', ['Gotita de mezcal'])
 
     @patch('src.clients.musixmatch.client.requests')
     def test_fetch_lyric_when_lyric_not_found(self, requests_mock):
@@ -126,11 +155,16 @@ class TestMusixmatch:
         )
         
         musixmatch = Musixmatch('api_key')
+        song = musixmatch.fetch_lyric(Song(
+            'Cumbiera Intelectual',
+            'Kevin Johansen',
+            'En Vivo', 
+            [], 
+            1, 
+            None)
+        )
 
-        with pytest.raises(LyricNotFound) as error:
-            lyrics = musixmatch.fetch_lyric('000', '000')
-
-        assert str(error.value) == 'Lyric not found. You may try other index: track_id=000, common_track_id=000'
+        assert song.lyric == None
 
     @patch('src.clients.musixmatch.client.requests')
     def test_fetch_lyric_when_service_error(self, requests_mock):
@@ -147,10 +181,16 @@ class TestMusixmatch:
         
         musixmatch = Musixmatch('api_key')
 
-        with pytest.raises(ServiceError) as error:
-            lyrics = musixmatch.fetch_lyric('123', '456')
+        song = musixmatch.fetch_lyric(Song(
+            'Cumbiera Intelectual',
+            'Kevin Johansen',
+            'En Vivo', 
+            [], 
+            1, 
+            None)
+        )
 
-        assert str(error.value) == 'Response API error: response="500"'
+        assert song.lyric == None
 
     @patch('src.clients.musixmatch.client.requests')
     def test_fetch_lyric_when_lyric_not_provided_yet(self, requests_mock):
@@ -167,10 +207,16 @@ class TestMusixmatch:
         
         musixmatch = Musixmatch('api_key')
 
-        with pytest.raises(LyricNotProvidedYet) as error:
-            lyrics = musixmatch.fetch_lyric('123', '456')
+        song = musixmatch.fetch_lyric(Song(
+            'Cumbiera Intelectual',
+            'Kevin Johansen',
+            'En Vivo', 
+            [], 
+            1, 
+            None)
+        )
 
-        assert str(error.value) == 'Lyric not provided for this song or song is instrumental. You may try other index: track_id=123, common_track_id=456'
+        assert song.lyric == None
 
     def _build_response_mock(self, code: int=200, text: str='', json: dict=None):
         response_mock = MagicMock()
