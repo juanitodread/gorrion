@@ -68,7 +68,7 @@ class Musixmatch:
                 song.lyric = lyric
                 return song
         except Exception as error:
-            print(f'Trying next song: {error}')
+            print(f'Trying next index: {error}')
         
         return song
 
