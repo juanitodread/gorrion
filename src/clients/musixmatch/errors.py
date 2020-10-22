@@ -9,8 +9,8 @@ class ServiceError(MusixmatchApiError):
 
 
 class SongNotFound(MusixmatchApiError):
-    def __init__(self, song: str, artist: str):
-        super().__init__(f'Song not found: song={song}, artist={artist}')
+    def __init__(self, song: str):
+        super().__init__(f'Song not found: song={song}')
 
 class LyricNotFound(MusixmatchApiError):
     def __init__(self, track_id: str, common_track_id: str):
