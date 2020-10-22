@@ -2,7 +2,11 @@ from unittest.mock import patch, MagicMock
 
 from src.gorrion import Gorrion
 from src.config import Config
-from src.clients.spotify.models import Track, Album, Artist
+from src.clients.spotify.models import (
+    Track,
+    Album,
+    Artist
+)
 
 class TestGorrion:
     @patch('src.gorrion.Spotify')
