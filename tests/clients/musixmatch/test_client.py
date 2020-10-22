@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from src.clients.musixmatch.client import Musixmatch
-from src.clients.musixmatch.models import Song, Track, Lyr-ic
+from src.clients.musixmatch.models import Song, Track, Lyric
 from src.clients.musixmatch.errors import (
     SongNotFound,
     ServiceError,
