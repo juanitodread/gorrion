@@ -62,14 +62,14 @@ class Musixmatch:
         return song
 
     def fetch_lyric(self, song: Song) -> Song:
-        for track in song.tracks:
-            try:
+        try:
+            for track in song.tracks:
                 lyric = self._fetch_lyric(track.id_, track.common_id)
                 song.lyric = lyric
                 return song
-            except Exception as error:
-                print(f'Trying next song: {error}')
-                pass
+        except Exception as error:
+            print(f'Trying next song: {error}')
+        
         return song
 
     def _fetch_lyric(self, track_id: str, common_track_id: str) -> Lyric:

@@ -45,7 +45,7 @@ class Gorrion:
         song = self._musixmatch.fetch_lyric(song)
         lyric_tweets = self.lyrics_to_tweets(song.lyric.content)
 
-        print('Lyric:')
+        print('\n[---------------------- Lyric ----------------------]')
         if not disable_twitter:
             post = self._twitter.post(status)
             if post:
