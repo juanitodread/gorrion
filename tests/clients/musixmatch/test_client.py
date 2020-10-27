@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from src.clients.musixmatch.client import Musixmatch
+from src.clients.musixmatch.config import MusixmatchConfig as Config
 from src.clients.musixmatch.models import Song, Track, Lyric
 from src.clients.musixmatch.errors import (
     SongNotFound,
@@ -14,7 +15,7 @@ from src.clients.musixmatch.errors import (
 
 class TestMusixmatch:
     def test_constructor(self):
-        musixmatch = Musixmatch('api_key')
+        musixmatch = Musixmatch(Config('api_key'))
 
         assert musixmatch._api_key == 'api_key'
 
@@ -45,7 +46,7 @@ class TestMusixmatch:
             }
         )
         
-        musixmatch = Musixmatch('api_key')
+        musixmatch = Musixmatch(Config('api_key'))
         song = musixmatch.search_song('Cumbiera Intelectual', 'Kevin Johansen', 'Mi querido Brasil')
 
         assert song == Song(
@@ -81,7 +82,7 @@ class TestMusixmatch:
             }
         )
         
-        musixmatch = Musixmatch('api_key')
+        musixmatch = Musixmatch(Config('api_key'))
 
         with pytest.raises(SongNotFound) as error:
             track_id, common_track_id = musixmatch.search_song('Cumbiera No Intelectual', 'Kevin Johansen', 'En Vivo')
@@ -103,7 +104,7 @@ class TestMusixmatch:
             }
         )
         
-        musixmatch = Musixmatch('api_key')
+        musixmatch = Musixmatch(Config('api_key'))
 
         with pytest.raises(ServiceError) as error:
             track_id, common_track_id = musixmatch.search_song('Cumbiera Intelectual', 'Kevin Johansen', 'En Vivo')
@@ -127,7 +128,7 @@ class TestMusixmatch:
             }
         )
         
-        musixmatch = Musixmatch('api_key')
+        musixmatch = Musixmatch(Config('api_key'))
         song = musixmatch.fetch_lyric(Song(
             'Cumbiera Intelectual',
             'Kevin Johansen',
@@ -154,7 +155,7 @@ class TestMusixmatch:
             }
         )
         
-        musixmatch = Musixmatch('api_key')
+        musixmatch = Musixmatch(Config('api_key'))
         song = musixmatch.fetch_lyric(Song(
             'Cumbiera Intelectual',
             'Kevin Johansen',
@@ -179,7 +180,7 @@ class TestMusixmatch:
             }
         )
         
-        musixmatch = Musixmatch('api_key')
+        musixmatch = Musixmatch(Config('api_key'))
 
         song = musixmatch.fetch_lyric(Song(
             'Cumbiera Intelectual',
@@ -205,7 +206,7 @@ class TestMusixmatch:
             }
         )
         
-        musixmatch = Musixmatch('api_key')
+        musixmatch = Musixmatch(Config('api_key'))
 
         song = musixmatch.fetch_lyric(Song(
             'Cumbiera Intelectual',

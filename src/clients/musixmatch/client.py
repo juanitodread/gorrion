@@ -2,6 +2,7 @@ import re
 
 import requests
 
+from src.clients.musixmatch.config import MusixmatchConfig
 from src.clients.musixmatch.models import Song, Track, Lyric
 from src.clients.musixmatch.errors import (
     SongNotFound,
@@ -14,8 +15,8 @@ from src.clients.musixmatch.errors import (
 class Musixmatch:
     API_URL = 'https://api.musixmatch.com/ws/1.1'
 
-    def __init__(self, api_key: str) -> None:
-        self._api_key = api_key
+    def __init__(self, config: MusixmatchConfig) -> None:
+        self._api_key = config.api_key
 
     def search_song(self, song: str, artist: str, album: str) -> Song:
         song = Song(song, artist, album)

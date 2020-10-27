@@ -11,20 +11,9 @@ from src.clients.musixmatch.client import Musixmatch
 
 class Gorrion:
     def __init__(self) -> None:
-        self._spotify = Spotify(
-            Config.SPOTIFY_CLIENT_ID,
-            Config.SPOTIFY_CLIENT_SECRET,
-            Config.SPOTIFY_REFRESH_TOKEN,
-        )
-        self._twitter = Twitter(
-            Config.TWITTER_API_CONSUMER_KEY,
-            Config.TWITTER_API_CONSUMER_SECRET,
-            Config.TWITTER_API_ACCESS_TOKEN,
-            Config.TWITTER_API_ACCESS_TOKEN_SECRET,
-        )
-        self._musixmatch = Musixmatch(
-            Config.MUSIXMATCH_API_KEY,
-        )
+        self._spotify = Spotify(Config.get_spotify_config())
+        self._twitter = Twitter(Config.get_twitter_config())
+        self._musixmatch = Musixmatch(Config.get_musixmatch_config())
 
     def playing(self, disable_twitter: bool=False) -> None:
         current_track = self._spotify.get_current_track()

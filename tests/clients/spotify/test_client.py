@@ -3,13 +3,14 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from src.clients.spotify.client import Spotify
+from src.clients.spotify.config import SpotifyConfig as Config
 from src.clients.spotify.errors import ServiceError, NotPlayingError
 from src.clients.spotify.models import Track, Album, Artist
 
 
 class TestSpotify:
     def test_constructor(self):
-        spotify = Spotify('client_id', 'client_secret', 'refresh_token')
+        spotify = Spotify(Config('client_id', 'client_secret', 'refresh_token'))
         
         assert spotify._client_id == 'client_id'
         assert spotify._client_secret == 'client_secret'
@@ -21,7 +22,7 @@ class TestSpotify:
             json={'access_token': '92170cdc034b2ff819323ff670d3b7266c8bffcd'}
         )
         
-        spotify = Spotify('client_id', 'client_secret', 'refresh_token')
+        spotify = Spotify(Config('client_id', 'client_secret', 'refresh_token'))
         token = spotify.refresh_access_token()
 
         assert token == '92170cdc034b2ff819323ff670d3b7266c8bffcd'
@@ -30,7 +31,7 @@ class TestSpotify:
     def test_refresh_token_when_error_response(self, requests_mock):
         requests_mock.post.return_value = self._build_response_mock(code=500, text='internal server error')
 
-        spotify = Spotify('client_id', 'client_secret', 'refresh_token')
+        spotify = Spotify(Config('client_id', 'client_secret', 'refresh_token'))
 
         with pytest.raises(ServiceError) as error:
             spotify.refresh_access_token()
@@ -66,7 +67,7 @@ class TestSpotify:
         }
         requests_mock.get.return_value = self._build_response_mock(code=200, json=json_response)
 
-        spotify = Spotify('client_id', 'client_secret', 'refresh_token')
+        spotify = Spotify(Config('client_id', 'client_secret', 'refresh_token'))
         track = spotify.get_current_track()
 
         assert track == Track(
@@ -82,7 +83,7 @@ class TestSpotify:
     def test_get_current_track_when_not_playing_error(self, refresh_access_token_mock, requests_mock):
         requests_mock.get.return_value = self._build_response_mock(code=204, text='')
 
-        spotify = Spotify('client_id', 'client_secret', 'refresh_token')
+        spotify = Spotify(Config('client_id', 'client_secret', 'refresh_token'))
 
         with pytest.raises(NotPlayingError) as error:
             track = spotify.get_current_track()
@@ -94,7 +95,7 @@ class TestSpotify:
     def test_get_current_track_when_error_response(self, refresh_access_token_mock, requests_mock):
         requests_mock.get.return_value = self._build_response_mock(code=500, text='internal server error')
 
-        spotify = Spotify('client_id', 'client_secret', 'refresh_token')
+        spotify = Spotify(Config('client_id', 'client_secret', 'refresh_token'))
 
         with pytest.raises(ServiceError) as error:
             track = spotify.get_current_track()
@@ -102,7 +103,7 @@ class TestSpotify:
         assert str(error.value) == 'Response API error: response="internal server error"'
 
     def test_get_basic_auth_token(self):
-        spotify = Spotify('client_id', 'client_secret', 'refresh_token')
+        spotify = Spotify(Config('client_id', 'client_secret', 'refresh_token'))
 
         basic_auth_token = spotify.get_basic_auth_token()
 
