@@ -1,6 +1,6 @@
-from src.clients.spotify.config import SpotifyConfig
-from src.clients.twitter.config import TwitterConfig
-from src.clients.musixmatch.config import MusixmatchConfig
+from src.clients.spotify import SpotifyConfig
+from src.clients.twitter import TwitterConfig
+from src.clients.musixmatch import MusixmatchConfig
 
 
 class Config:

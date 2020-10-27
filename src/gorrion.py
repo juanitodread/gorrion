@@ -3,11 +3,15 @@ import argparse
 import time
 
 from src.config import Config
-from src.clients.spotify.client import Spotify
-from src.clients.spotify.models import Track
-from src.clients.twitter.client import Twitter
-from src.clients.musixmatch.client import Musixmatch
-from src.clients.musixmatch.models import Lyric
+from src.clients.spotify import (
+    Spotify,
+    Track,
+)
+from src.clients.twitter import Twitter
+from src.clients.musixmatch import (
+    Musixmatch,
+    Lyric,
+)
 
 
 class Gorrion:
