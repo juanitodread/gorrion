@@ -7,6 +7,7 @@ from src.clients.spotify.client import Spotify
 from src.clients.spotify.models import Track
 from src.clients.twitter.client import Twitter
 from src.clients.musixmatch.client import Musixmatch
+from src.clients.musixmatch.models import Lyric
 
 
 class Gorrion:
@@ -32,9 +33,12 @@ class Gorrion:
             current_track.album.name
         )
         song = self._musixmatch.fetch_lyric(song)
-        lyric_tweets = self.lyrics_to_tweets(song.lyric.content)
+        lyric_tweets = []
 
-        print('\n[---------------------- Lyric ----------------------]')
+        if song.lyric:
+            lyric_tweets = self.lyrics_to_tweets(song.lyric.content)
+            print('\n[---------------------- Lyric ----------------------]')
+
         if not disable_twitter:
             post = self._twitter.post(status)
             if post:
