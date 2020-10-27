@@ -3,7 +3,7 @@ from json.decoder import JSONDecodeError
 
 import requests
 
-from src.config import Config
+from src.clients.spotify.config import SpotifyConfig
 from src.clients.spotify.models import Track, Album, Artist
 from src.clients.spotify.errors import ServiceError, NotPlayingError
 
@@ -13,10 +13,10 @@ class Spotify:
     API_TOKEN_URL = 'https://accounts.spotify.com/api/token'
     API_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
     
-    def __init__(self, client_id: str, client_secret: str, refresh_token: str) -> None:
-        self._client_id = client_id
-        self._client_secret = client_secret
-        self._refresh_token = refresh_token
+    def __init__(self, config: SpotifyConfig) -> None:
+        self._client_id = config.client_id
+        self._client_secret = config.client_secret
+        self._refresh_token = config.refresh_token
 
     def refresh_access_token(self) -> str:
         authorization = self.get_basic_auth_token()

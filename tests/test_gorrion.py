@@ -16,18 +16,13 @@ class TestGorrion:
         gorrion = Gorrion()
 
         spotify_mock.assert_called_once_with(
-            Config.SPOTIFY_CLIENT_ID, 
-            Config.SPOTIFY_CLIENT_SECRET, 
-            Config.SPOTIFY_REFRESH_TOKEN,
+            Config.get_spotify_config()
         )
         twitter_mock.assert_called_once_with(
-            Config.TWITTER_API_CONSUMER_KEY,
-            Config.TWITTER_API_CONSUMER_SECRET,
-            Config.TWITTER_API_ACCESS_TOKEN,
-            Config.TWITTER_API_ACCESS_TOKEN_SECRET,
+            Config.get_twitter_config()
         )
         musixmatch_mock.assert_called_once_with(
-            Config.MUSIXMATCH_API_KEY,
+            Config.get_musixmatch_config()
         )
 
         assert gorrion._spotify != None

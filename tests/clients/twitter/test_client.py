@@ -1,17 +1,18 @@
 from unittest.mock import patch, MagicMock
 
 from src.clients.twitter.client import Twitter
+from src.clients.twitter.config import TwitterConfig as Config
 
 
 class TestTwitter:
     @patch('src.clients.twitter.client.API')
     def test_constructor(self, API_mock):
-        twitter = Twitter(
+        twitter = Twitter(Config(
             'consumer-key',
             'consumer-secret',
             'access-token',
             'access-token-secret',
-        )
+        ))
 
         assert twitter._consumer_key == 'consumer-key'
         assert twitter._consumer_secret == 'consumer-secret'
@@ -20,12 +21,12 @@ class TestTwitter:
         assert twitter._client != None
 
     def test_max_tweet_length(self):
-        twitter = Twitter(
+        twitter = Twitter(Config(
             'consumer-key',
             'consumer-secret',
             'access-token',
             'access-token-secret',
-        )
+        ))
 
         assert twitter.max_tweet_length == 280
 
@@ -33,12 +34,12 @@ class TestTwitter:
     def test_post(self, API_mock):
         API_mock.return_value.update_status = MagicMock(return_value='Tweet ha sido enviado')
 
-        twitter = Twitter(
+        twitter = Twitter(Config(
             'consumer-key',
             'consumer-secret',
             'access-token',
             'access-token-secret',
-        )
+        ))
 
         status = twitter.post('tweet status')
 
