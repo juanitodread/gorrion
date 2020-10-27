@@ -1,4 +1,8 @@
-from src.clients.spotify.errors import SpotifyApiError, ServiceError, NotPlayingError
+from src.clients.spotify.errors import (
+    SpotifyApiError,
+    ServiceError,
+    NotPlayingError,
+)
 
 
 class TestErrors:
