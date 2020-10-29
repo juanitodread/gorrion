@@ -1,2 +1,2 @@
 #!/bin/bash
-python -m src.gorrion "$@"
+python -m src.cli "$@"

@@ -1,132 +1,201 @@
 from unittest.mock import patch, MagicMock
 
+import pytest
+
 from src.gorrion import Gorrion
 from src.config import Config
-from src.clients.spotify.models import (
+from src.clients.spotify import (
     Track,
     Album,
     Artist
 )
+from src.clients.musixmatch import Song, Lyric
+from src.clients.twitter import TwitterLocal, PublishedTweet
+
+
+@pytest.fixture()
+def twitter():
+    return TwitterLocal(Config.get_twitter_config())
+
+
+@pytest.fixture()
+def track():
+    return Track(
+        '1', 'Peligro', '', 1, 'http:spotify.com/track/1',
+        Album('11', 'Pa morirse de amor', '', '2006-01-01'),
+        [
+            Artist('12', 'Ely Guerra', '')
+        ]
+    )
+
+
+@pytest.fixture()
+def lyric():
+    return Lyric('123', '456', '789', ['lyric1', 'lyric2'])
+
+
+@pytest.fixture()
+def song():
+    return Song('Peligro', 'Ely Guerra', 'Pa morirse de amor')
+
 
 class TestGorrion:
-    @patch('src.gorrion.Spotify')
-    @patch('src.gorrion.Twitter')
-    @patch('src.gorrion.Musixmatch')
-    def test_constructor(self, musixmatch_mock, twitter_mock, spotify_mock):
-        gorrion = Gorrion()
-
-        spotify_mock.assert_called_once_with(
-            Config.get_spotify_config()
-        )
-        twitter_mock.assert_called_once_with(
-            Config.get_twitter_config()
-        )
-        musixmatch_mock.assert_called_once_with(
-            Config.get_musixmatch_config()
-        )
+    def test_constructor(self, twitter):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
         assert gorrion._spotify != None
         assert gorrion._twitter != None
         assert gorrion._musixmatch != None
 
-    @patch('src.gorrion.Spotify')
-    @patch('src.gorrion.Musixmatch')
-    @patch('builtins.print')
-    def test_playing_full_status(self, print_mock, musixmatch_mock, spotify_mock):
-        get_current_track_mock = MagicMock(return_value=Track(
-            '1', 'Peligro', '', 1, '',
-            Album('11', 'Pa morirse de amor', '', '2006-01-01'),
-            [
-                Artist('12', 'Ely Guerra', '')
-            ]
-        ))
+    def test_playing(self, twitter, track, song, lyric):
+        spotify_mock = MagicMock()
+        spotify_mock.get_current_track.return_value = track
 
-        spotify_mock.return_value.get_current_track = get_current_track_mock
-        musixmatch_mock.return_value.search_song.return_value = ('1', '2')
+        musixmatch_mock = MagicMock()
+        song.lyric = lyric
+        musixmatch_mock.fetch_lyric.return_value = song
 
-        gorrion = Gorrion()
-        gorrion.playing(disable_twitter=True)
+        gorrion = Gorrion(spotify_mock, twitter, musixmatch_mock)
+        tweets = gorrion.playing()
 
-        get_current_track_mock.assert_called_once_with()
-        print_mock.assert_any_call('Now listening 🔊🎶: \n\n'
-                                   'Track: 1. Peligro\nAlbum: Pa morirse de amor\n'
-                                   'Artist: Ely Guerra\n\n#gorrion #NowPlaying #ElyGuerra\n\n')
+        assert tweets == [
+            PublishedTweet(
+                id_='fake-status-id', 
+                tweet=('Now listening 🔊🎶: \n\n'
+                    'Track: 1. Peligro\n'
+                    'Album: Pa morirse de amor\n'
+                    'Artist: Ely Guerra\n\n'
+                    '#gorrion #NowPlaying #ElyGuerra\n\n'
+                    'http:spotify.com/track/1'), 
+                entity=Track(
+                    id_='1', 
+                    name='Peligro', 
+                    href='', 
+                    track_number=1, 
+                    public_url='http:spotify.com/track/1', 
+                    album=Album(id_='11', name='Pa morirse de amor', href='', release_date='2006-01-01'), 
+                    artists=[Artist(id_='12', name='Ely Guerra', href='')]
+                )
+            ),
+            PublishedTweet(id_='fake-status-id', tweet='lyric1', entity=None),
+            PublishedTweet(id_='fake-status-id', tweet='lyric2', entity=None),
+        ]
 
-    @patch('src.gorrion.Spotify')
-    @patch('src.gorrion.Musixmatch')
-    @patch('builtins.print')
-    def test_playing_short_status(self, print_mock, musixmatch_mock, spotify_mock):
-        get_current_track_mock = MagicMock(return_value=Track(
-            '1',
-            'Barcelona, Ciutat Refugi', 
-            'https://api.spotify.com/v1/tracks/72NWtDFShJ2gVVVL41UlHZ', 
-            3,
-            'https://open.spotify.com/track/72NWtDFShJ2gVVVL41UlHZ',
-            Album('11', 'Black is beltza ASM Sessions', '', '2006-01-01'),
-            [
-                Artist('12', 'Fermin Muguruza', ''),
-                Artist('13', 'Chalart58', ''),
-                Artist('14', 'Chrishira Perrier', ''),
-                Artist('15', 'Ashlin Parker', ''),
-                Artist('16', 'Vic Navarrete', ''),
-            ]
-        ))
+    def test_get_playing_track(self, twitter, track):
+        spotify_mock = MagicMock()
+        spotify_mock.get_current_track.return_value = track
 
-        spotify_mock.return_value.get_current_track = get_current_track_mock
-        musixmatch_mock.return_value.search_song.return_value = ('1', '2')
+        gorrion = Gorrion(spotify_mock, twitter, MagicMock())
 
-        gorrion = Gorrion()
-        gorrion.playing(disable_twitter=True)
+        current_track = gorrion.get_playing_track()
 
-        get_current_track_mock.assert_called_once_with()
+        assert current_track == Track(
+            id_='1', 
+            name='Peligro', 
+            href='', 
+            track_number=1, 
+            public_url='http:spotify.com/track/1', 
+            album=Album(id_='11', name='Pa morirse de amor', href='', release_date='2006-01-01'), 
+            artists=[Artist(id_='12', name='Ely Guerra', href='')]
+        )
 
-        print_mock.assert_any_call('(Using short status)')
-        print_mock.assert_any_call('Now listening 🔊🎶: \n\n'
-                                   'Track: 3. Barcelona, Ciutat Refugi\n'
-                                   'Album: Black is beltza ASM Sessions\n'
-                                   'Artist: Fermin Muguruza, Chalart58, Chrishira Perrier, Ashlin Parker, Vic Navarrete\n\n'
-                                   '#gorrion #NowPlaying\n\nhttps://open.spotify.com/track/72NWtDFShJ2gVVVL41UlHZ')
+    def test_publish_track(self, twitter, track):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
-    @patch('src.gorrion.Musixmatch')
-    @patch('src.gorrion.Spotify')
-    @patch('src.gorrion.Twitter')
-    def test_playing_disable_twitter(self, twitter_mock, spotify_mock, musixmatch_mock):
-        get_current_track_mock = MagicMock()
-        twitter_post_mock = MagicMock()
+        track_tweet = gorrion.publish_track(track)
 
-        spotify_mock.return_value.get_current_track = get_current_track_mock
-        twitter_mock.return_value.post = twitter_post_mock
-        twitter_mock.return_value.max_tweet_length = 280
-        musixmatch_mock.return_value.search_song.return_value = ('1', '2')
+        assert track_tweet == PublishedTweet(
+            id_='fake-status-id', 
+            tweet=('Now listening 🔊🎶: \n\n'
+                   'Track: 1. Peligro\n'
+                   'Album: Pa morirse de amor\n'
+                   'Artist: Ely Guerra\n\n'
+                   '#gorrion #NowPlaying #ElyGuerra\n\n'
+                   'http:spotify.com/track/1'), 
+            entity=Track(
+                id_='1', 
+                name='Peligro', 
+                href='', 
+                track_number=1, 
+                public_url='http:spotify.com/track/1', 
+                album=Album(id_='11', name='Pa morirse de amor', href='', release_date='2006-01-01'), 
+                artists=[Artist(id_='12', name='Ely Guerra', href='')]
+            )
+        )
 
-        gorrion = Gorrion()
-        gorrion.playing(disable_twitter=True)
+    def test_get_lyric(self, twitter, track, song, lyric):
+        musixmatch_mock = MagicMock()
+        musixmatch_mock.search_song.return_value = song
+        song.lyric = lyric
+        musixmatch_mock.fetch_lyric.return_value = song
 
-        get_current_track_mock.assert_called_once_with()
-        twitter_post_mock.assert_not_called()
+        gorrion = Gorrion(MagicMock(), twitter, musixmatch_mock)
 
-    @patch('src.gorrion.Musixmatch')
-    @patch('src.gorrion.Spotify')
-    @patch('src.gorrion.Twitter')
-    def test_playing_enable_twitter(self, twitter_mock, spotify_mock, musixmatch_mock):
-        get_current_track_mock = MagicMock(return_value=Track(
-            '1', 'Peligro', '', 1, '',
-            Album('11', 'Pa morirse de amor', '', '2006-01-01'),
-            [
-                Artist('12', 'Ely Guerra', '')
-            ]
-        ))
-        twitter_post_mock = MagicMock()
+        song = gorrion.get_lyric(track)
 
-        spotify_mock.return_value.get_current_track = get_current_track_mock
-        twitter_mock.return_value.post = twitter_post_mock
-        twitter_mock.return_value.max_tweet_length = 280
-        musixmatch_mock.return_value.search_song.return_value = ('1', '2')
+        assert song == Song(
+            name='Peligro', 
+            artist='Ely Guerra', 
+            album='Pa morirse de amor', 
+            tracks=None, 
+            tracks_length=0, 
+            lyric=Lyric(id_='123', track_id='456', common_track_id='789', content=['lyric1', 'lyric2']))
 
-        gorrion = Gorrion()
-        gorrion.playing()
+    def test_publish_lyrics(self, twitter, song, lyric):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
-        get_current_track_mock.assert_called_once_with()
-        twitter_post_mock.assert_called_once_with('Now listening 🔊🎶: \n\n'
-                                                  'Track: 1. Peligro\nAlbum: Pa morirse de amor\n'
-                                                  'Artist: Ely Guerra\n\n#gorrion #NowPlaying #ElyGuerra\n\n')
+        published_track = PublishedTweet('1', 'track', None)
+        song.lyric = lyric
+        published_lyrics = gorrion.publish_lyrics(published_track, song)
+
+        assert published_lyrics == [
+            PublishedTweet(id_='fake-status-id', tweet='lyric1', entity=None), 
+            PublishedTweet(id_='fake-status-id', tweet='lyric2', entity=None),
+        ]
+
+    def test_publish_lyrics_when_lyric_not_found(self, twitter, song):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+
+        published_track = PublishedTweet('1', 'track', None)
+        published_lyrics = gorrion.publish_lyrics(published_track, song)
+
+        assert published_lyrics == []
+
+    def test_full_status(self, twitter, track):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+
+        status = gorrion.full_status(track)
+        assert status == ('Now listening 🔊🎶: \n\n'
+                          'Track: 1. Peligro\n'
+                          'Album: Pa morirse de amor\n'
+                          'Artist: Ely Guerra\n\n'
+                          '#gorrion #NowPlaying #ElyGuerra\n\n'
+                          'http:spotify.com/track/1')
+
+    def test_short_status(self, twitter, track):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+
+        status = gorrion.short_status(track)
+        assert status == ('Now listening 🔊🎶: \n\n'
+                          'Track: 1. Peligro\n'
+                          'Album: Pa morirse de amor\n'
+                          'Artist: Ely Guerra\n\n'
+                          '#gorrion #NowPlaying\n\n'
+                          'http:spotify.com/track/1')
+
+    def test_is_valid_tweet_status_when_valid_status(self, twitter):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+        
+        assert gorrion.is_valid_tweet_status('1' * 280)
+
+    def test_is_valid_tweet_status_when_invalid_status(self, twitter):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+        
+        assert not gorrion.is_valid_tweet_status('1' * 281)
+
+    def test_lyrics_to_tweets_short_lyrics(self, twitter):
+        lyrics = ['lyric1', 'lyric2', 'lyric3']
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+        tweets = gorrion.lyrics_to_tweets(lyrics)
+
+        assert tweets == ['lyric1', 'lyric2', 'lyric3']
