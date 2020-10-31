@@ -11,6 +11,7 @@ from src.clients.musixmatch import (
     Musixmatch,
     Lyric,
     Song,
+    MusixmatchApiError,
 )
 
 
@@ -48,12 +49,19 @@ class Gorrion:
         return tweeted_track
 
     def get_lyric(self, track: Track) -> Song:
-        song = self._musixmatch.search_song(
+        song = Song(
             track.name,
             track.artists[0].name,
-            track.album.name
+            track.album.name,
         )
-        return self._musixmatch.fetch_lyric(song)
+
+        try:
+            song = self._musixmatch.search_song(song)
+            song = self._musixmatch.fetch_lyric(song)
+        except MusixmatchApiError:
+            pass
+            
+        return song
 
     def publish_lyrics(self, tweeted_track: PublishedTweet, song: Song) -> list:
         if not song.lyric:

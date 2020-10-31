@@ -30,5 +30,9 @@ class Song:
     lyric: Lyric=None
 
     def __post_init__(self):
-        has_parentheses = self.name.find('(')
-        self.name = self.name[0:has_parentheses if has_parentheses > 0 else len(self.name)].strip()
+        self.name = self._sanitize(self.name, '(')
+        self.name = self._sanitize(self.name, '-')
+
+    def _sanitize(self, name: str, char_to_remove: str) -> str:
+        found_char = name.find(char_to_remove)
+        return name[0:found_char if found_char > 0 else len(name)].strip()

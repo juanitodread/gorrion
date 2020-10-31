@@ -12,6 +12,12 @@ class SongNotFound(MusixmatchApiError):
     def __init__(self, song: str):
         super().__init__(f'Song not found: song={song}')
 
+
+class SongHasNoLyrics(MusixmatchApiError):
+    def __init__(self, song: str):
+        super().__init__(f'Song has no lyrics: song={song}')
+
+
 class LyricNotFound(MusixmatchApiError):
     def __init__(self, track_id: str, common_track_id: str):
         super().__init__(f'Lyric not found. You may try other index: '
