@@ -6,6 +6,7 @@ from src.clients.musixmatch.config import MusixmatchConfig
 from src.clients.musixmatch.models import Song, Track, Lyric
 from src.clients.musixmatch.errors import (
     SongNotFound,
+    SongHasNoLyrics,
     ServiceError,
     LyricNotFound,
     LyricNotProvidedYet,
@@ -18,9 +19,7 @@ class Musixmatch:
     def __init__(self, config: MusixmatchConfig) -> None:
         self._api_key = config.api_key
 
-    def search_song(self, song: str, artist: str, album: str) -> Song:
-        song = Song(song, artist, album)
-
+    def search_song(self, song: Song) -> Song:
         response = requests.get(
             f'{Musixmatch.API_URL}/track.search',
             params={
@@ -43,7 +42,7 @@ class Musixmatch:
         body = json_response['message']['body']
 
         if body['track_list'] == []:
-            raise LyricNotProvidedYet(song)
+            raise SongHasNoLyrics(song)
 
         tracks = [Track(
                     id_=track['track']['track_id'],

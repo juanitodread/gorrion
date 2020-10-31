@@ -1,7 +1,7 @@
 import argparse
 
 from src.config import Config
-from src.clients.spotify import Spotify, SpotifyConfig
+from src.clients.spotify import Spotify, SpotifyConfig, SpotifyApiError
 from src.clients.twitter import Twitter, TwitterLocal, TwitterConfig
 from src.clients.musixmatch import Musixmatch, MusixmatchConfig
 from src.gorrion import Gorrion
@@ -35,18 +35,21 @@ def get_gorrion(local_mode: bool) -> Gorrion:
     return Gorrion(spotify, twitter, musixmatch)
 
 def playing(local_mode: bool) -> None:
-    gorrion = get_gorrion(local_mode)
+    try:
+        gorrion = get_gorrion(local_mode)
 
-    tweets = gorrion.playing()
-    song, *lyrics = tweets
-    
-    print('[---------------------- Song -----------------------]')
-    print(song.tweet)
+        tweets = gorrion.playing()
+        song, *lyrics = tweets
+        
+        print('[---------------------- Song -----------------------]')
+        print(song.tweet)
 
-    if lyrics:
-        lyrics_tweets = '\n\n'.join([lyric.tweet for lyric in lyrics])
-        print('[---------------------- Lyric ----------------------]')
-        print(lyrics_tweets)
+        if lyrics:
+            lyrics_tweets = '\n\n'.join([lyric.tweet for lyric in lyrics])
+            print('[---------------------- Lyric ----------------------]')
+            print(lyrics_tweets)
+    except SpotifyApiError as error:
+        print(error)
 
 if __name__ == "__main__":
     args = parse_args()
