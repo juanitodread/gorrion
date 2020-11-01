@@ -1,3 +1,5 @@
+import time
+
 from tweepy import OAuthHandler, API
 
 from src.clients.twitter.config import TwitterConfig
@@ -10,6 +12,8 @@ class Twitter:
         self._consumer_secret = config.consumer_secret
         self._access_token = config.access_token
         self._access_token_secret = config.access_token_secret
+        self._retweet_delay = config.retweet_delay
+        self._retweet_delay_secs = config.retweet_delay_secs
         
         auth = OAuthHandler(self._consumer_key, self._consumer_secret)
         auth.set_access_token(self._access_token, self._access_token_secret)
@@ -22,6 +26,9 @@ class Twitter:
         return PublishedTweet(status.id, tweet, None)
 
     def reply(self, tweet: str, tweet_id: int) -> PublishedTweet:
+        if self._retweet_delay:
+            time.sleep(self._retweet_delay_secs)
+
         status = self._client.update_status(tweet, in_reply_to_status_id=tweet_id)
 
         return PublishedTweet(status.id, tweet, None)
@@ -33,10 +40,12 @@ class Twitter:
 
 class TwitterLocal(Twitter):
     def __init__(self, config: TwitterConfig) -> None:
-        pass
+        super().__init__(config)
 
     def post(self, tweet: str) -> PublishedTweet:
         return PublishedTweet('fake-status-id', tweet, None)
 
     def reply(self, tweet: str, tweet_id: int) -> PublishedTweet:
+        if self._retweet_delay:
+            time.sleep(self._retweet_delay_secs)
         return PublishedTweet('fake-status-id', tweet, None)

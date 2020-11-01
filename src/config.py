@@ -12,6 +12,8 @@ class Config:
     TWITTER_CONSUMER_SECRET = ''
     TWITTER_ACCESS_TOKEN = ''
     TWITTER_ACCESS_TOKEN_SECRET = ''
+    TWITTER_CONFIG_RETWEET_DELAY = False
+    TWITTER_CONFIG_RETWEET_DELAY_SECS = 3
 
     MUSIXMATCH_API_KEY = ''
 
@@ -30,6 +32,8 @@ class Config:
             Config.TWITTER_CONSUMER_SECRET,
             Config.TWITTER_ACCESS_TOKEN,
             Config.TWITTER_ACCESS_TOKEN_SECRET,
+            Config.TWITTER_CONFIG_RETWEET_DELAY,
+            Config.TWITTER_CONFIG_RETWEET_DELAY_SECS,
         )
 
     @staticmethod
