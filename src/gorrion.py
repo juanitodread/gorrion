@@ -24,14 +24,19 @@ class Gorrion:
         self._twitter = twitter
         self._musixmatch = musixmatch
 
-    def playing(self) -> list:
+    def playing(self) -> PublishedTweet:
         current_track = self.get_playing_track()
-        track_tweet = self.publish_track(current_track)
+        tweet = self.publish_track(current_track)
 
-        song = self.get_lyric(current_track)
-        lyrics_tweets = self.publish_lyrics(track_tweet, song)
+        return tweet
 
-        return [track_tweet, *lyrics_tweets]
+    def playing_with_lyrics(self) -> list:
+        current_track_tweet = self.playing()
+
+        song = self.get_lyric(current_track_tweet.entity)
+        lyrics_tweets = self.publish_lyrics(current_track_tweet, song)
+
+        return [current_track_tweet, *lyrics_tweets]
 
     def get_playing_track(self) -> Track:
         current_track = self._spotify.get_current_track()
