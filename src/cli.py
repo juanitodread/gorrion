@@ -22,21 +22,29 @@ def parse_args():
         default=False,
         help='Enables local mode. No Twitter sync.'
     )
+    parser.add_argument(
+        '-d',
+        '--delay',
+        action='store_true',
+        default=False,
+        help='Enables lyrics delay mode.'
+    )
 
     return parser.parse_args()
 
-def get_gorrion(local_mode: bool) -> Gorrion:
+def get_gorrion(local_mode: bool, delay_mode: bool) -> Gorrion:
     spotify = Spotify(Config.get_spotify_config())
     musixmatch = Musixmatch(Config.get_musixmatch_config())
 
     twitter_config = Config.get_twitter_config()
+    twitter_config.retweet_delay = delay_mode
     twitter = TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config)
     
     return Gorrion(spotify, twitter, musixmatch)
 
-def playing(local_mode: bool) -> None:
+def playing(local_mode: bool, delay_mode: bool) -> None:
     try:
-        gorrion = get_gorrion(local_mode)
+        gorrion = get_gorrion(local_mode, delay_mode)
 
         tweets = gorrion.playing()
         song, *lyrics = tweets
@@ -56,6 +64,7 @@ if __name__ == "__main__":
 
     command = args.command
     local_mode = args.local
+    delay_mode = args.delay
 
     valid_commands = ('playing', 'lyric')
     if command not in valid_commands:
@@ -63,6 +72,6 @@ if __name__ == "__main__":
         quit()
 
     if command == 'playing':
-        playing(local_mode)
+        playing(local_mode, delay_mode)
     elif command == 'lyric':
         pass
