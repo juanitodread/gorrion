@@ -56,7 +56,37 @@ class TestGorrion:
         musixmatch_mock.fetch_lyric.return_value = song
 
         gorrion = Gorrion(spotify_mock, twitter, musixmatch_mock)
-        tweets = gorrion.playing()
+        tweet = gorrion.playing()
+
+        assert tweet == PublishedTweet(
+            id_='fake-status-id', 
+            tweet=('Now listening 🔊🎶: \n\n'
+                'Track: 1. Peligro\n'
+                'Album: Pa morirse de amor\n'
+                'Artist: Ely Guerra\n\n'
+                '#gorrion #NowPlaying #ElyGuerra\n\n'
+                'http:spotify.com/track/1'), 
+            entity=Track(
+                id_='1', 
+                name='Peligro', 
+                href='', 
+                track_number=1, 
+                public_url='http:spotify.com/track/1', 
+                album=Album(id_='11', name='Pa morirse de amor', href='', release_date='2006-01-01'), 
+                artists=[Artist(id_='12', name='Ely Guerra', href='')]
+            )
+        )
+
+    def test_playing_with_lyric(self, twitter, track, song, lyric):
+        spotify_mock = MagicMock()
+        spotify_mock.get_current_track.return_value = track
+
+        musixmatch_mock = MagicMock()
+        song.lyric = lyric
+        musixmatch_mock.fetch_lyric.return_value = song
+
+        gorrion = Gorrion(spotify_mock, twitter, musixmatch_mock)
+        tweets = gorrion.playing_with_lyrics()
 
         assert tweets == [
             PublishedTweet(
