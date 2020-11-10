@@ -21,15 +21,7 @@ class TelegramBot:
         text = update.message.text.encode('utf-8').decode()
 
         if text not in self._get_commands():
-            self._bot.send_message(
-                chat_id=chat_id,
-                text='Invalid command'
-            )
-            commands = '\n'.join(self._get_commands())
-            self._bot.send_message(
-                chat_id=chat_id,
-                text=f'Supported commands are: \n\n{commands}'
-            )
+            self.invalid_command(chat_id)
             return
 
         if text == '/start':
@@ -67,7 +59,10 @@ class TelegramBot:
                 text=song.tweet
             )
         except SpotifyApiError as error:
-            print(error)
+            self._bot.send_message(
+                chat_id=chat_id,
+                text=f'{error}',
+            )
 
     def playing_with_lyrics(self, 
                             chat_id: str, 
@@ -90,12 +85,26 @@ class TelegramBot:
                         text=lyric.tweet
                     )
         except SpotifyApiError as error:
-            print(error)
+            self._bot.send_message(
+                chat_id=chat_id,
+                text=f'{error}',
+            )
 
     def about(self, chat_id: str) -> None:
         self._bot.send_message(
             chat_id=chat_id,
             text='Made with ❤️ by @juanitodread'
+        )
+
+    def invalid_command(self, chat_id: str) -> None:
+        self._bot.send_message(
+            chat_id=chat_id,
+            text='Invalid command'
+        )
+        commands = '\n'.join(self._get_commands())
+        self._bot.send_message(
+            chat_id=chat_id,
+            text=f'Supported commands are: \n\n{commands}'
         )
 
     def _build_gorrion(self, local_mode: bool, delay_mode: bool) -> Gorrion:
