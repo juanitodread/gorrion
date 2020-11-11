@@ -1,21 +1,25 @@
+import os
+
 from src.clients.spotify import SpotifyConfig
 from src.clients.twitter import TwitterConfig
 from src.clients.musixmatch import MusixmatchConfig
 
 
 class Config:
-    SPOTIFY_CLIENT_ID = ''
-    SPOTIFY_CLIENT_SECRET = ''
-    SPOTIFY_REFRESH_TOKEN = ''
+    SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
+    SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
+    SPOTIFY_REFRESH_TOKEN = os.getenv('SPOTIFY_REFRESH_TOKEN')
 
-    TWITTER_CONSUMER_KEY = ''
-    TWITTER_CONSUMER_SECRET = ''
-    TWITTER_ACCESS_TOKEN = ''
-    TWITTER_ACCESS_TOKEN_SECRET = ''
-    TWITTER_CONFIG_RETWEET_DELAY = False
-    TWITTER_CONFIG_RETWEET_DELAY_SECS = 3
+    TWITTER_CONSUMER_KEY = os.getenv('TWITTER_CONSUMER_KEY')
+    TWITTER_CONSUMER_SECRET = os.getenv('TWITTER_CONSUMER_SECRET')
+    TWITTER_ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
+    TWITTER_ACCESS_TOKEN_SECRET = os.getenv('TWITTER_ACCESS_TOKEN_SECRET')
+    TWITTER_CONFIG_RETWEET_DELAY = os.getenv('TWITTER_CONFIG_RETWEET_DELAY') == 'True'
+    TWITTER_CONFIG_RETWEET_DELAY_SECS = int(os.getenv('TWITTER_CONFIG_RETWEET_DELAY_SECS', 3))
 
-    MUSIXMATCH_API_KEY = ''
+    MUSIXMATCH_API_KEY = os.getenv('MUSIXMATCH_API_KEY')
+
+    TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
     @staticmethod
     def get_spotify_config() -> SpotifyConfig:

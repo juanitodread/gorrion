@@ -1,9 +1,9 @@
 import argparse
 
 from src.config import Config
-from src.clients.spotify import Spotify, SpotifyConfig, SpotifyApiError
-from src.clients.twitter import Twitter, TwitterLocal, TwitterConfig
-from src.clients.musixmatch import Musixmatch, MusixmatchConfig
+from src.clients.spotify import Spotify, SpotifyApiError
+from src.clients.twitter import Twitter, TwitterLocal
+from src.clients.musixmatch import Musixmatch
 from src.gorrion import Gorrion
 
 
