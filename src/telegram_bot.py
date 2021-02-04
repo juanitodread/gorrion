@@ -1,6 +1,3 @@
-import os
-
-import telegram
 from telegram import Bot, Update
 
 from src.gorrion import Gorrion
@@ -118,7 +115,7 @@ class TelegramBot:
         return Gorrion(spotify, twitter, musixmatch)
 
     def _get_commands(self) -> list:
-        return ('/start', '/playing', '/lyric', '/about')
+        return ['/start', '/playing', '/lyric', '/about']
 
 
 def do_work(event, context) -> dict:

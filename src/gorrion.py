@@ -4,21 +4,19 @@ from src.clients.spotify import (
 )
 from src.clients.twitter import (
     Twitter,
-    TwitterLocal,
     PublishedTweet,
 )
 from src.clients.musixmatch import (
     Musixmatch,
-    Lyric,
     Song,
     MusixmatchApiError,
 )
 
 
 class Gorrion:
-    def __init__(self, 
-                 spotify: Spotify, 
-                 twitter: Twitter, 
+    def __init__(self,
+                 spotify: Spotify,
+                 twitter: Twitter,
                  musixmatch: Musixmatch) -> None:
         self._spotify = spotify
         self._twitter = twitter
@@ -50,7 +48,7 @@ class Gorrion:
 
         tweeted_track = self._twitter.post(tweet_track)
         tweeted_track.entity = track
-        
+
         return tweeted_track
 
     def get_lyric(self, track: Track) -> Song:
@@ -65,7 +63,7 @@ class Gorrion:
             song = self._musixmatch.fetch_lyric(song)
         except MusixmatchApiError:
             pass
-            
+
         return song
 
     def publish_lyrics(self, tweeted_track: PublishedTweet, song: Song) -> list:
@@ -79,24 +77,24 @@ class Gorrion:
         for lyric in lyrics:
             tweet = self._twitter.reply(lyric, tweet.id_)
             published_tweets.append(tweet)
-        
+
         return published_tweets
 
     def full_status(self, track: Track) -> str:
         return ('Now listening 🔊🎶: \n'
-               f'\nTrack: {track.track_number}. {track.name}'
-               f'\nAlbum: {track.album.name}'
-               f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
-               f'\n\n#gorrion #NowPlaying {self._get_artists_hashtag(track.artists)}'
-               f'\n\n{track.public_url}')
+                f'\nTrack: {track.track_number}. {track.name}'
+                f'\nAlbum: {track.album.name}'
+                f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
+                f'\n\n#gorrion #NowPlaying {self._get_artists_hashtag(track.artists)}'
+                f'\n\n{track.public_url}')
 
     def short_status(self, track: Track) -> str:
         return ('Now listening 🔊🎶: \n'
-               f'\nTrack: {track.track_number}. {track.name}'
-               f'\nAlbum: {track.album.name}'
-               f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
-               f'\n\n#gorrion #NowPlaying'
-               f'\n\n{track.public_url}')
+                f'\nTrack: {track.track_number}. {track.name}'
+                f'\nAlbum: {track.album.name}'
+                f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
+                f'\n\n#gorrion #NowPlaying'
+                f'\n\n{track.public_url}')
 
     def is_valid_tweet_status(self, status: str) -> bool:
         return len(status) <= self._twitter.max_tweet_length
@@ -109,14 +107,14 @@ class Gorrion:
             else:
                 lines = paragraph.split('\n')
                 lines_group = self._chunks(lines, 4)
-                new_paragraphs = ['\n'.join(new_paragraph) 
+                new_paragraphs = ['\n'.join(new_paragraph)
                                   for new_paragraph in lines_group]
                 lyric_tweets += new_paragraphs
 
         return lyric_tweets
 
     def _get_artists_hashtag(self, artists: list) -> str:
-        artists_hashtag = [self._to_hashtag(artist.name) 
+        artists_hashtag = [self._to_hashtag(artist.name)
                            for artist in artists]
         return ' '.join(artists_hashtag)
 

@@ -41,7 +41,7 @@ class Musixmatch:
 
         body = json_response['message']['body']
 
-        if body['track_list'] == []:
+        if not body['track_list']:
             raise SongHasNoLyrics(song)
 
         tracks = [Track(
@@ -93,7 +93,7 @@ class Musixmatch:
 
         body = json_response['message']['body']
 
-        if body == []:
+        if not body:
             raise LyricNotProvidedYet(track_id, common_track_id)
 
         lyric = body['lyrics']

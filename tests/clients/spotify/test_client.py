@@ -27,7 +27,7 @@ class TestSpotify:
         requests_mock.post.return_value = self._build_response_mock(
             json={'access_token': '92170cdc034b2ff819323ff670d3b7266c8bffcd'}
         )
-        
+
         token = spotify.refresh_access_token()
 
         assert token == '92170cdc034b2ff819323ff670d3b7266c8bffcd'
@@ -38,7 +38,7 @@ class TestSpotify:
 
         with pytest.raises(ServiceError) as error:
             spotify.refresh_access_token()
-        
+
         assert str(error.value) == 'Response API error: response="internal server error"'
 
     @patch('src.clients.spotify.client.requests')
@@ -104,7 +104,7 @@ class TestSpotify:
 
         assert basic_auth_token == 'Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ='
 
-    def _build_response_mock(self, code: int=200, text: str='', json: dict=None):
+    def _build_response_mock(self, code: int = 200, text: str = '', json: dict = None):
         response_mock = MagicMock()
         response_mock.status_code = code
         response_mock.text = text
