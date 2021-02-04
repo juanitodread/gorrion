@@ -1,5 +1,4 @@
 import base64
-from json.decoder import JSONDecodeError
 
 import requests
 

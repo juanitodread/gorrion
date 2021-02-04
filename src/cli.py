@@ -72,7 +72,7 @@ class CLI:
             '--delay',
             action='store_true',
             default=False,
-            help='Enables lyrics delay mode.'
+            help='Enables lyric delay mode.'
         )
 
         return parser.parse_args()

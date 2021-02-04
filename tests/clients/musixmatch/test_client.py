@@ -6,7 +6,7 @@ from src.clients.musixmatch.client import (
     Musixmatch,
     MusixmatchConfig,
     Song, Track, Lyric,
-    SongNotFound, ServiceError, LyricNotFound, LyricNotProvidedYet,
+    SongNotFound, ServiceError,
 )
 
 
@@ -21,9 +21,9 @@ def song() -> Song:
     return Song(
         'Cumbiera Intelectual',
         'Kevin Johansen',
-        'En Vivo', 
-        [], 
-        1, 
+        'En Vivo',
+        [],
+        1,
         None,
     )
 
@@ -51,7 +51,7 @@ class TestMusixmatch:
                 ]
             }
         )
-        
+
         song_found = musixmatch.search_song(song)
 
         assert song_found == Song(
@@ -78,7 +78,8 @@ class TestMusixmatch:
         requests_mock.get.return_value = self._build_response_mock(code=404, json={})
 
         with pytest.raises(SongNotFound) as error:
-            track_id, common_track_id = musixmatch.search_song(Song('Cumbiera No Intelectual', 'Kevin Johansen', 'En Vivo'))
+            track_id, common_track_id = musixmatch.search_song(
+                Song('Cumbiera No Intelectual', 'Kevin Johansen', 'En Vivo'))
 
         assert str(error.value) == ("Song not found: song=Song(name='Cumbiera No Intelectual', artist='Kevin "
                                     "Johansen', album='En Vivo', tracks=None, tracks_length=0, lyric=None)")
@@ -113,7 +114,7 @@ class TestMusixmatch:
 
         song_found = musixmatch.fetch_lyric(song)
 
-        assert song_found.lyric == None
+        assert song_found.lyric is None
 
     @patch('src.clients.musixmatch.client.requests')
     def test_fetch_lyric_when_service_error(self, requests_mock, musixmatch, song):
@@ -121,7 +122,7 @@ class TestMusixmatch:
 
         song_found = musixmatch.fetch_lyric(song)
 
-        assert song_found.lyric == None
+        assert song_found.lyric is None
 
     @patch('src.clients.musixmatch.client.requests')
     def test_fetch_lyric_when_lyric_not_provided_yet(self, requests_mock, musixmatch, song):
@@ -129,9 +130,9 @@ class TestMusixmatch:
 
         song_found = musixmatch.fetch_lyric(song)
 
-        assert song_found.lyric == None
+        assert song_found.lyric is None
 
-    def _build_response_mock(self, code: int=200, text: str='', json: dict=None):
+    def _build_response_mock(self, code: int = 200, text: str = '', json: dict = None):
         response_mock = MagicMock()
         response_mock.status_code = code
         response_mock.text = text
@@ -142,6 +143,6 @@ class TestMusixmatch:
                 },
                 'body': json,
             }
-        } if json != None else {}
+        } if json is not None else {}
 
         return response_mock
