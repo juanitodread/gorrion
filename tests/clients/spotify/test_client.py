@@ -34,12 +34,13 @@ class TestSpotify:
 
     @patch('src.clients.spotify.client.requests')
     def test_refresh_token_when_error_response(self, requests_mock, spotify):
-        requests_mock.post.return_value = self._build_response_mock(code=500, text='internal server error')
+        requests_mock.post.return_value = self._build_response_mock(code=500, json={'error': 'internal server error'})
 
         with pytest.raises(ServiceError) as error:
             spotify.refresh_access_token()
 
-        assert str(error.value) == 'Response API error: response="internal server error"'
+        assert str(error.value) == ("Response API error:\n\n"
+                                    "Reason: {'header': {}, 'body': {'error': 'internal server error'}}")
 
     @patch('src.clients.spotify.client.requests')
     @patch('src.clients.spotify.client.Spotify.refresh_access_token')
@@ -92,12 +93,13 @@ class TestSpotify:
     @patch('src.clients.spotify.client.requests')
     @patch('src.clients.spotify.client.Spotify.refresh_access_token')
     def test_get_current_track_when_error_response(self, refresh_access_token_mock, requests_mock, spotify):
-        requests_mock.get.return_value = self._build_response_mock(code=500, text='internal server error')
+        requests_mock.get.return_value = self._build_response_mock(code=500, json={'error': 'internal server error'})
 
         with pytest.raises(ServiceError) as error:
             track = spotify.get_current_track()
 
-        assert str(error.value) == 'Response API error: response="internal server error"'
+        assert str(error.value) == ("Response API error:\n\n"
+                                    "Reason: {'header': {}, 'body': {'error': 'internal server error'}}")
 
     def test_get_basic_auth_token(self, spotify):
         basic_auth_token = spotify.get_basic_auth_token()

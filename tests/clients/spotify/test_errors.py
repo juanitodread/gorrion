@@ -12,9 +12,12 @@ class TestErrors:
         assert str(error) == 'error'
 
     def test_service_error(self):
-        error = ServiceError('service-error')
+        header = {'header1': 'value1'}
+        body = {'body1': 'value1'}
+        error = ServiceError(header, body)
 
-        assert str(error) == 'Response API error: response="service-error"'
+        assert str(error) == ("Response API error:\n\n"
+                              "Reason: {'header': {'header1': 'value1'}, 'body': {'body1': 'value1'}}")
 
     def test_not_playing_error(self):
         error = NotPlayingError()
