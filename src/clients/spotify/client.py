@@ -32,7 +32,7 @@ class Spotify:
         )
 
         if response.status_code != 200:
-            raise ServiceError(response.text)
+            raise ServiceError(response.headers, response.json())
 
         json_response = response.json()
         
@@ -49,7 +49,7 @@ class Spotify:
         )
         
         if response.status_code not in (200, 204):
-            raise ServiceError(response.text)
+            raise ServiceError(response.headers, response.json())
         
         if response.status_code == 204:
             raise NotPlayingError()
