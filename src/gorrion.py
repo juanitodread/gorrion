@@ -66,7 +66,9 @@ class Gorrion:
 
         return song
 
-    def publish_lyrics(self, tweeted_track: PublishedTweet, song: Song) -> list:
+    def publish_lyrics(self,
+                       tweeted_track: PublishedTweet,
+                       song: Song) -> list:
         if not song.lyric:
             return []
 

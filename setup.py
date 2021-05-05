@@ -8,6 +8,6 @@ setup(
    author='Juan Sandoval',
    author_email='',
    packages=['gorrion'],
-   install_requires=[], #external packages as dependencies
-   scripts=[]
+   install_requires=[],
+   scripts=[],
 )

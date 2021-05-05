@@ -33,7 +33,7 @@ class TelegramBot:
         if text == '/about':
             self.about(chat_id)
             return
-    
+
     def start(self, chat_id: str) -> None:
         self._bot.send_message(
             chat_id=chat_id,
@@ -50,7 +50,7 @@ class TelegramBot:
             gorrion = self._build_gorrion(local_mode, False)
 
             song = gorrion.playing()
-            
+
             self._bot.send_message(
                 chat_id=chat_id,
                 text=song.tweet
@@ -61,16 +61,16 @@ class TelegramBot:
                 text=f'{error}',
             )
 
-    def playing_with_lyrics(self, 
-                            chat_id: str, 
-                            local_mode: bool, 
+    def playing_with_lyrics(self,
+                            chat_id: str,
+                            local_mode: bool,
                             delay_mode: bool) -> None:
         try:
             gorrion = self._build_gorrion(local_mode, delay_mode)
 
             tweets = gorrion.playing_with_lyrics()
             song, *lyrics = tweets
-            
+
             self._bot.send_message(
                 chat_id=chat_id,
                 text=song.tweet
@@ -111,7 +111,7 @@ class TelegramBot:
         twitter_config = Config.get_twitter_config()
         twitter_config.retweet_delay = delay_mode
         twitter = TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config)
-        
+
         return Gorrion(spotify, twitter, musixmatch)
 
     def _get_commands(self) -> list:

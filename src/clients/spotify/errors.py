@@ -1,5 +1,8 @@
 class SpotifyApiError(Exception):
-    def __init__(self, message: str, response_header: dict = None, response_body: dict = None):
+    def __init__(self,
+                 message: str,
+                 response_header: dict = None,
+                 response_body: dict = None):
         if response_header is None and response_body is None:
             super().__init__(message)
             return
@@ -7,9 +10,14 @@ class SpotifyApiError(Exception):
         response_header = {} if response_header is None else response_header
         response_body = {} if response_body is None else response_body
 
-        super().__init__(f'{message}:\n\nReason: {self._build_message(response_header, response_body)}')
+        super().__init__(
+            f'{message}:\n\nReason: '
+            f'{self._build_message(response_header, response_body)}'
+        )
 
-    def _build_message(self, response_header: dict, response_body: dict) -> dict:
+    def _build_message(self,
+                       response_header: dict,
+                       response_body: dict) -> dict:
         return {
             'header': self._remove_token_info(response_header),
             'body': self._remove_token_info(response_body),

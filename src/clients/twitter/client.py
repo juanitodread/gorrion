@@ -14,7 +14,7 @@ class Twitter:
         self._access_token_secret = config.access_token_secret
         self._retweet_delay = config.retweet_delay
         self._retweet_delay_secs = config.retweet_delay_secs
-        
+
         auth = OAuthHandler(self._consumer_key, self._consumer_secret)
         auth.set_access_token(self._access_token, self._access_token_secret)
 
@@ -29,7 +29,10 @@ class Twitter:
         if self._retweet_delay:
             time.sleep(self._retweet_delay_secs)
 
-        status = self._client.update_status(tweet, in_reply_to_status_id=tweet_id)
+        status = self._client.update_status(
+            tweet,
+            in_reply_to_status_id=tweet_id
+        )
 
         return PublishedTweet(status.id, tweet, None)
 
