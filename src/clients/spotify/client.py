@@ -11,7 +11,7 @@ class Spotify:
     API_URL = 'https://api.spotify.com/v1'
     API_TOKEN_URL = 'https://accounts.spotify.com/api/token'
     API_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
-    
+
     def __init__(self, config: SpotifyConfig) -> None:
         self._client_id = config.client_id
         self._client_secret = config.client_secret
@@ -35,7 +35,7 @@ class Spotify:
             raise ServiceError(response.headers, response.json())
 
         json_response = response.json()
-        
+
         return json_response['access_token']
 
     def get_current_track(self) -> Track:
@@ -47,15 +47,15 @@ class Spotify:
                 'Authorization': f'Bearer {access_token}'
             }
         )
-        
+
         if response.status_code not in (200, 204):
             raise ServiceError(response.headers, response.json())
-        
+
         if response.status_code == 204:
             raise NotPlayingError()
 
         json_response = response.json()
-        
+
         track = Track(
             id_=json_response['item']['id'],
             name=json_response['item']['name'],

@@ -69,7 +69,7 @@ class Musixmatch:
                 return song
         except Exception as error:
             print(f'Trying next index: {error}')
-        
+
         return song
 
     def _fetch_lyric(self, track_id: str, common_track_id: str) -> Lyric:
@@ -101,7 +101,7 @@ class Musixmatch:
         paragraphs = self._build_lyric(lyric['lyrics_body'])
 
         return Lyric(
-            id_=lyric['lyrics_id'], 
+            id_=lyric['lyrics_id'],
             track_id=track_id,
             common_track_id=common_track_id,
             content=paragraphs
@@ -109,19 +109,20 @@ class Musixmatch:
 
     def _build_lyric(self, raw_lyric: str) -> list:
         # remove metadata text
-        lyric = raw_lyric.replace('******* This Lyrics is NOT for Commercial use *******', '')
+        lyric = raw_lyric.replace('******* This Lyrics is NOT '
+                                  'for Commercial use *******', '')
         lyric = lyric.replace('...', '')
         lyric = re.sub(r'\([0-9]+\)', '', lyric)
 
         raw_paragraphs = lyric.split('\n\n')
 
         # filter paragraphs
-        paragraphs = [paragraph for paragraph in raw_paragraphs 
+        paragraphs = [paragraph for paragraph in raw_paragraphs
                       if len(paragraph.strip()) > 0]
 
         return paragraphs
 
-    def _sort_tracks(self, song: Song) -> list:        
+    def _sort_tracks(self, song: Song) -> list:
         # match name and album
         same_albums = []
         diff_albums = []

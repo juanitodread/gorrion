@@ -1,3 +1,4 @@
+# flake8: noqa
 from src.clients.twitter.client import (
     Twitter,
     TwitterLocal,

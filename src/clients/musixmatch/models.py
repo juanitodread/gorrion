@@ -25,9 +25,9 @@ class Song:
     name: str
     artist: str
     album: str
-    tracks: list=None
-    tracks_length: int=0
-    lyric: Lyric=None
+    tracks: list = None
+    tracks_length: int = 0
+    lyric: Lyric = None
 
     def __post_init__(self):
         self.name = self._sanitize(self.name, '(')

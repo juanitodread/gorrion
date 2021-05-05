@@ -13,7 +13,7 @@ class CLI:
             gorrion = self._build_gorrion(local_mode, False)
 
             song = gorrion.playing()
-            
+
             print(self._get_song_header())
             print(song.tweet)
         except SpotifyApiError as error:
@@ -25,7 +25,7 @@ class CLI:
 
             tweets = gorrion.playing_with_lyrics()
             song, *lyrics = tweets
-            
+
             print(self._get_song_header())
             print(song.tweet)
 
@@ -43,7 +43,7 @@ class CLI:
         twitter_config = Config.get_twitter_config()
         twitter_config.retweet_delay = delay_mode
         twitter = TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config)
-        
+
         return Gorrion(spotify, twitter, musixmatch)
 
     def _get_song_header(self) -> str:
@@ -54,7 +54,7 @@ class CLI:
 
     def _parse_args(self) -> None:
         parser = argparse.ArgumentParser(description='Gorrion app')
-        
+
         parser.add_argument(
             'command',
             type=str,
