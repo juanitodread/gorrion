@@ -9,7 +9,11 @@ class TestCLI:
     @patch('src.cli.Gorrion')
     @patch('builtins.print')
     def test_playing(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing.return_value = PublishedTweet('123', 'song', None)
+        gorrion_mock.return_value.playing.return_value = PublishedTweet(
+            '123',
+            'song',
+            None
+        )
 
         cli = CLI()
         cli.playing(True)
@@ -19,8 +23,12 @@ class TestCLI:
 
     @patch('src.cli.Gorrion')
     @patch('builtins.print')
-    def test_playing_when_spotify_error(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing.side_effect = SpotifyApiError('spotify error')
+    def test_playing_when_spotify_error(self,
+                                        print_mock,
+                                        gorrion_mock):
+        gorrion_mock.return_value.playing.side_effect = SpotifyApiError(
+            'spotify error'
+        )
 
         cli = CLI()
         cli.playing(True)
@@ -46,7 +54,9 @@ class TestCLI:
 
     @patch('src.cli.Gorrion')
     @patch('builtins.print')
-    def test_playing_with_lyrics_when_spotify_error(self, print_mock, gorrion_mock):
+    def test_playing_with_lyrics_when_spotify_error(self,
+                                                    print_mock,
+                                                    gorrion_mock):
         gorrion_mock.return_value.playing_with_lyrics.side_effect = SpotifyApiError('spotify error')
 
         cli = CLI()
@@ -57,7 +67,11 @@ class TestCLI:
     @patch('src.cli.Gorrion')
     @patch('builtins.print')
     def test_playing_album(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing_album.return_value = PublishedTweet('123', 'song', None)
+        gorrion_mock.return_value.playing_album.return_value = PublishedTweet(
+            '123',
+            'song',
+            None
+        )
 
         cli = CLI()
         cli.playing_album(True)
@@ -67,8 +81,12 @@ class TestCLI:
 
     @patch('src.cli.Gorrion')
     @patch('builtins.print')
-    def test_playing_album_when_spotify_error(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing_album.side_effect = SpotifyApiError('spotify error')
+    def test_playing_album_when_spotify_error(self,
+                                              print_mock,
+                                              gorrion_mock):
+        gorrion_mock.return_value.playing_album.side_effect = SpotifyApiError(
+            'spotify error'
+        )
 
         cli = CLI()
         cli.playing_album(True)

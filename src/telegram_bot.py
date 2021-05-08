@@ -110,7 +110,8 @@ class TelegramBot:
 
         twitter_config = Config.get_twitter_config()
         twitter_config.retweet_delay = delay_mode
-        twitter = TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config)
+        twitter = (TwitterLocal(twitter_config)
+                   if local_mode else Twitter(twitter_config))
 
         return Gorrion(spotify, twitter, musixmatch)
 

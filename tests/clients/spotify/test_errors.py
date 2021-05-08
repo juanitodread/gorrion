@@ -16,10 +16,13 @@ class TestErrors:
         body = {'body1': 'value1'}
         error = ServiceError(header, body)
 
-        assert str(error) == ("Response API error:\n\n"
-                              "Reason: {'header': {'header1': 'value1'}, 'body': {'body1': 'value1'}}")
+        assert str(error) == (
+            "Response API error:\n\n"
+            "Reason: {'header': {'header1': 'value1'}, "
+            "'body': {'body1': 'value1'}}"
+        )
 
     def test_not_playing_error(self):
         error = NotPlayingError()
-        
+
         assert str(error) == 'Not playing any song at this moment'

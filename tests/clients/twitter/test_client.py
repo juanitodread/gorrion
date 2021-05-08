@@ -27,7 +27,7 @@ class TestTwitter:
         assert twitter._consumer_secret == 'consumer-secret'
         assert twitter._access_token == 'access-token'
         assert twitter._access_token_secret == 'access-token-secret'
-        assert twitter._client != None
+        assert twitter._client is not None
 
     def test_post(self, twitter):
         status = twitter.post('tweet status')

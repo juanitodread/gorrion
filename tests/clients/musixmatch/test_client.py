@@ -75,18 +75,30 @@ class TestMusixmatch:
 
     @patch('src.clients.musixmatch.client.requests')
     def test_search_song_when_song_not_found(self, requests_mock, musixmatch):
-        requests_mock.get.return_value = self._build_response_mock(code=404, json={})
+        requests_mock.get.return_value = self._build_response_mock(
+            code=404,
+            json={}
+        )
 
         with pytest.raises(SongNotFound) as error:
             track_id, common_track_id = musixmatch.search_song(
                 Song('Cumbiera No Intelectual', 'Kevin Johansen', 'En Vivo'))
 
-        assert str(error.value) == ("Song not found: song=Song(name='Cumbiera No Intelectual', artist='Kevin "
-                                    "Johansen', album='En Vivo', tracks=None, tracks_length=0, lyric=None)")
+        assert str(error.value) == (
+            "Song not found: song=Song(name='Cumbiera No Intelectual', "
+            "artist='Kevin Johansen', album='En Vivo', tracks=None, "
+            "tracks_length=0, lyric=None)"
+        )
 
     @patch('src.clients.musixmatch.client.requests')
-    def test_search_song_when_service_error(self, requests_mock, musixmatch, song):
-        requests_mock.get.return_value = self._build_response_mock(code=500, json={})
+    def test_search_song_when_service_error(self,
+                                            requests_mock,
+                                            musixmatch,
+                                            song):
+        requests_mock.get.return_value = self._build_response_mock(
+            code=500,
+            json={}
+        )
 
         with pytest.raises(ServiceError) as error:
             track_id, common_track_id = musixmatch.search_song(song)
@@ -106,10 +118,18 @@ class TestMusixmatch:
         song.lyric = Lyric('987', '123', '456', ['Gotita de mezcal'])
         song_found = musixmatch.fetch_lyric(song)
 
-        assert song_found.lyric == Lyric('987', '123', '456', ['Gotita de mezcal'])
+        assert song_found.lyric == Lyric(
+            '987',
+            '123',
+            '456',
+            ['Gotita de mezcal']
+        )
 
     @patch('src.clients.musixmatch.client.requests')
-    def test_fetch_lyric_when_lyric_not_found(self, requests_mock, musixmatch, song):
+    def test_fetch_lyric_when_lyric_not_found(self,
+                                              requests_mock,
+                                              musixmatch,
+                                              song):
         requests_mock.get.return_value = self._build_response_mock(json=[])
 
         song_found = musixmatch.fetch_lyric(song)
@@ -117,7 +137,10 @@ class TestMusixmatch:
         assert song_found.lyric is None
 
     @patch('src.clients.musixmatch.client.requests')
-    def test_fetch_lyric_when_service_error(self, requests_mock, musixmatch, song):
+    def test_fetch_lyric_when_service_error(self,
+                                            requests_mock,
+                                            musixmatch,
+                                            song):
         requests_mock.get.return_value = self._build_response_mock(json=[])
 
         song_found = musixmatch.fetch_lyric(song)
@@ -125,14 +148,20 @@ class TestMusixmatch:
         assert song_found.lyric is None
 
     @patch('src.clients.musixmatch.client.requests')
-    def test_fetch_lyric_when_lyric_not_provided_yet(self, requests_mock, musixmatch, song):
+    def test_fetch_lyric_when_lyric_not_provided_yet(self,
+                                                     requests_mock,
+                                                     musixmatch,
+                                                     song):
         requests_mock.get.return_value = self._build_response_mock(json=[])
 
         song_found = musixmatch.fetch_lyric(song)
 
         assert song_found.lyric is None
 
-    def _build_response_mock(self, code: int = 200, text: str = '', json: dict = None):
+    def _build_response_mock(self,
+                             code: int = 200,
+                             text: str = '',
+                             json: dict = None):
         response_mock = MagicMock()
         response_mock.status_code = code
         response_mock.text = text
