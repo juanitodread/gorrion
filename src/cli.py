@@ -36,6 +36,17 @@ class CLI:
         except SpotifyApiError as error:
             print(error)
 
+    def playing_album(self, local_mode: bool) -> None:
+        try:
+            gorrion = self._build_gorrion(local_mode, False)
+
+            song = gorrion.playing_album()
+
+            print(self._get_album_header())
+            print(song.tweet)
+        except SpotifyApiError as error:
+            print(error)
+
     def _build_gorrion(self, local_mode: bool, delay_mode: bool) -> Gorrion:
         spotify = Spotify(Config.get_spotify_config())
         musixmatch = Musixmatch(Config.get_musixmatch_config())
@@ -52,13 +63,16 @@ class CLI:
     def _get_lyric_header(self) -> str:
         return '[---------------------- Lyric ----------------------]'
 
+    def _get_album_header(self) -> str:
+        return '[---------------------- Album ----------------------]'
+
     def _parse_args(self) -> None:
         parser = argparse.ArgumentParser(description='Gorrion app')
 
         parser.add_argument(
             'command',
             type=str,
-            help='The available commands to execute: [playing, lyric].'
+            help='The available commands to execute: [playing, lyric, album].'
         )
         parser.add_argument(
             '-l',
@@ -86,7 +100,7 @@ if __name__ == "__main__":
     local_mode = args.local
     delay_mode = args.delay
 
-    valid_commands = ('playing', 'lyric')
+    valid_commands = ('playing', 'lyric', 'album')
     if command not in valid_commands:
         print(f'Invalid command. Use: {valid_commands}')
         quit()
@@ -96,4 +110,8 @@ if __name__ == "__main__":
         quit()
     if command == 'lyric':
         cli.playing_with_lyrics(local_mode, delay_mode)
+        quit()
+
+    if command == 'album':
+        cli.playing_album(local_mode)
         quit()
