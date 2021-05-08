@@ -24,13 +24,13 @@ def track():
         '1',
         'Peligro',
         '',
-        'http:spotify.com/track/1',
+        'http://spotify.com/track/1',
         1,
         Album(
             '11',
             'Pa morirse de amor',
             '',
-            'http:spotify.com/album/11',
+            'http://spotify.com/album/11',
             '2006-01-01',
             19,
         ),
@@ -39,7 +39,7 @@ def track():
                 '12',
                 'Ely Guerra',
                 '',
-                'http:spotify.com/artist/12',
+                'http://spotify.com/artist/12',
             ),
         ]
     )
@@ -82,19 +82,19 @@ class TestGorrion:
                 'Album: Pa morirse de amor\n'
                 'Artist: Ely Guerra\n\n'
                 '#gorrion #NowPlaying #ElyGuerra\n\n'
-                'http:spotify.com/track/1'
+                'http://spotify.com/track/1'
             ),
             entity=Track(
                 id_='1',
                 name='Peligro',
                 href='',
-                public_url='http:spotify.com/track/1',
+                public_url='http://spotify.com/track/1',
                 track_number=1,
                 album=Album(
                     id_='11',
                     name='Pa morirse de amor',
                     href='',
-                    public_url='http:spotify.com/album/11',
+                    public_url='http://spotify.com/album/11',
                     release_date='2006-01-01',
                     total_tracks=19,
                 ),
@@ -103,7 +103,7 @@ class TestGorrion:
                         id_='12',
                         name='Ely Guerra',
                         href='',
-                        public_url='http:spotify.com/artist/12',
+                        public_url='http://spotify.com/artist/12',
                     ),
                 ]
             )
@@ -129,19 +129,19 @@ class TestGorrion:
                     'Album: Pa morirse de amor\n'
                     'Artist: Ely Guerra\n\n'
                     '#gorrion #NowPlaying #ElyGuerra\n\n'
-                    'http:spotify.com/track/1'
+                    'http://spotify.com/track/1'
                 ),
                 entity=Track(
                     id_='1',
                     name='Peligro',
                     href='',
-                    public_url='http:spotify.com/track/1',
+                    public_url='http://spotify.com/track/1',
                     track_number=1,
                     album=Album(
                         id_='11',
                         name='Pa morirse de amor',
                         href='',
-                        public_url='http:spotify.com/album/11',
+                        public_url='http://spotify.com/album/11',
                         release_date='2006-01-01',
                         total_tracks=19,
                     ),
@@ -150,7 +150,7 @@ class TestGorrion:
                             id_='12',
                             name='Ely Guerra',
                             href='',
-                            public_url='http:spotify.com/artist/12',
+                            public_url='http://spotify.com/artist/12',
                         ),
                     ]
                 )
@@ -158,6 +158,53 @@ class TestGorrion:
             PublishedTweet(id_='fake-status-id', tweet='lyric1', entity=None),
             PublishedTweet(id_='fake-status-id', tweet='lyric2', entity=None),
         ]
+
+    def test_playing_album(self, twitter, track, song, lyric):
+        spotify_mock = MagicMock()
+        spotify_mock.get_current_track.return_value = track
+
+        musixmatch_mock = MagicMock()
+        song.lyric = lyric
+        musixmatch_mock.fetch_lyric.return_value = song
+
+        gorrion = Gorrion(spotify_mock, twitter, musixmatch_mock)
+        tweet = gorrion.playing_album()
+
+        assert tweet == PublishedTweet(
+            id_='fake-status-id',
+            tweet=(
+                'Now listening 🔊🎶: \n\n'
+                'Album: Pa morirse de amor\n'
+                'Artist: Ely Guerra\n'
+                'Tracks: 19\n'
+                'Release: 2006\n\n'
+                '#gorrion #NowPlaying #PaMorirseDeAmor #ElyGuerra\n\n'
+                'http://spotify.com/album/11?si=g'
+            ),
+            entity=Track(
+                id_='1',
+                name='Peligro',
+                href='',
+                public_url='http://spotify.com/track/1',
+                track_number=1,
+                album=Album(
+                    id_='11',
+                    name='Pa morirse de amor',
+                    href='',
+                    public_url='http://spotify.com/album/11',
+                    release_date='2006-01-01',
+                    total_tracks=19,
+                ),
+                artists=[
+                    Artist(
+                        id_='12',
+                        name='Ely Guerra',
+                        href='',
+                        public_url='http://spotify.com/artist/12',
+                    ),
+                ]
+            )
+        )
 
     def test_get_playing_track(self, twitter, track):
         spotify_mock = MagicMock()
@@ -171,13 +218,13 @@ class TestGorrion:
             id_='1',
             name='Peligro',
             href='',
-            public_url='http:spotify.com/track/1',
+            public_url='http://spotify.com/track/1',
             track_number=1,
             album=Album(
                 id_='11',
                 name='Pa morirse de amor',
                 href='',
-                public_url='http:spotify.com/album/11',
+                public_url='http://spotify.com/album/11',
                 release_date='2006-01-01',
                 total_tracks=19,
             ),
@@ -186,49 +233,9 @@ class TestGorrion:
                     id_='12',
                     name='Ely Guerra',
                     href='',
-                    public_url='http:spotify.com/artist/12',
+                    public_url='http://spotify.com/artist/12',
                 ),
             ]
-        )
-
-    def test_publish_track(self, twitter, track):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
-
-        track_tweet = gorrion.publish_track(track)
-
-        assert track_tweet == PublishedTweet(
-            id_='fake-status-id',
-            tweet=(
-                'Now listening 🔊🎶: \n\n'
-                'Track: 1. Peligro\n'
-                'Album: Pa morirse de amor\n'
-                'Artist: Ely Guerra\n\n'
-                '#gorrion #NowPlaying #ElyGuerra\n\n'
-                'http:spotify.com/track/1'
-            ),
-            entity=Track(
-                id_='1',
-                name='Peligro',
-                href='',
-                public_url='http:spotify.com/track/1',
-                track_number=1,
-                album=Album(
-                    id_='11',
-                    name='Pa morirse de amor',
-                    href='',
-                    public_url='http:spotify.com/album/11',
-                    release_date='2006-01-01',
-                    total_tracks=19,
-                ),
-                artists=[
-                    Artist(
-                        id_='12',
-                        name='Ely Guerra',
-                        href='',
-                        public_url='http:spotify.com/artist/12',
-                    ),
-                ]
-            )
         )
 
     def test_get_lyric(self, twitter, track, song, lyric):
@@ -255,6 +262,46 @@ class TestGorrion:
             )
         )
 
+    def test_publish_track(self, twitter, track):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+
+        track_tweet = gorrion.publish_track(track)
+
+        assert track_tweet == PublishedTweet(
+            id_='fake-status-id',
+            tweet=(
+                'Now listening 🔊🎶: \n\n'
+                'Track: 1. Peligro\n'
+                'Album: Pa morirse de amor\n'
+                'Artist: Ely Guerra\n\n'
+                '#gorrion #NowPlaying #ElyGuerra\n\n'
+                'http://spotify.com/track/1'
+            ),
+            entity=Track(
+                id_='1',
+                name='Peligro',
+                href='',
+                public_url='http://spotify.com/track/1',
+                track_number=1,
+                album=Album(
+                    id_='11',
+                    name='Pa morirse de amor',
+                    href='',
+                    public_url='http://spotify.com/album/11',
+                    release_date='2006-01-01',
+                    total_tracks=19,
+                ),
+                artists=[
+                    Artist(
+                        id_='12',
+                        name='Ely Guerra',
+                        href='',
+                        public_url='http://spotify.com/artist/12',
+                    ),
+                ]
+            )
+        )
+
     def test_publish_lyrics(self, twitter, song, lyric):
         gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
@@ -275,6 +322,47 @@ class TestGorrion:
 
         assert published_lyrics == []
 
+    def test_publish_album(self, twitter, track):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+
+        album_tweet = gorrion.publish_album(track)
+
+        assert album_tweet == PublishedTweet(
+            id_='fake-status-id',
+            tweet=(
+                'Now listening 🔊🎶: \n\n'
+                'Album: Pa morirse de amor\n'
+                'Artist: Ely Guerra\n'
+                'Tracks: 19\n'
+                'Release: 2006\n\n'
+                '#gorrion #NowPlaying #PaMorirseDeAmor #ElyGuerra\n\n'
+                'http://spotify.com/album/11?si=g'
+            ),
+            entity=Track(
+                id_='1',
+                name='Peligro',
+                href='',
+                public_url='http://spotify.com/track/1',
+                track_number=1,
+                album=Album(
+                    id_='11',
+                    name='Pa morirse de amor',
+                    href='',
+                    public_url='http://spotify.com/album/11',
+                    release_date='2006-01-01',
+                    total_tracks=19,
+                ),
+                artists=[
+                    Artist(
+                        id_='12',
+                        name='Ely Guerra',
+                        href='',
+                        public_url='http://spotify.com/artist/12',
+                    ),
+                ]
+            )
+        )
+
     def test_full_status(self, twitter, track):
         gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
@@ -284,7 +372,7 @@ class TestGorrion:
                           'Album: Pa morirse de amor\n'
                           'Artist: Ely Guerra\n\n'
                           '#gorrion #NowPlaying #ElyGuerra\n\n'
-                          'http:spotify.com/track/1')
+                          'http://spotify.com/track/1')
 
     def test_short_status(self, twitter, track):
         gorrion = Gorrion(MagicMock(), twitter, MagicMock())
@@ -295,7 +383,31 @@ class TestGorrion:
                           'Album: Pa morirse de amor\n'
                           'Artist: Ely Guerra\n\n'
                           '#gorrion #NowPlaying\n\n'
-                          'http:spotify.com/track/1')
+                          'http://spotify.com/track/1')
+
+    def test_full_album_status(self, twitter, track):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+
+        status = gorrion.full_album_status(track)
+        assert status == ('Now listening 🔊🎶: \n\n'
+                          'Album: Pa morirse de amor\n'
+                          'Artist: Ely Guerra\n'
+                          'Tracks: 19\n'
+                          'Release: 2006\n\n'
+                          '#gorrion #NowPlaying #PaMorirseDeAmor #ElyGuerra\n\n'
+                          'http://spotify.com/album/11?si=g')
+
+    def test_short_album_status(self, twitter, track):
+        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+
+        status = gorrion.short_album_status(track)
+        assert status == ('Now listening 🔊🎶: \n\n'
+                          'Album: Pa morirse de amor\n'
+                          'Artist: Ely Guerra\n'
+                          'Tracks: 19\n'
+                          'Release: 2006\n\n'
+                          '#gorrion #NowPlaying #PaMorirseDeAmor\n\n'
+                          'http://spotify.com/album/11?si=g')
 
     def test_is_valid_tweet_status_when_valid_status(self, twitter):
         gorrion = Gorrion(MagicMock(), twitter, MagicMock())

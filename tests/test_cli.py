@@ -53,3 +53,24 @@ class TestCLI:
         cli.playing_with_lyrics(True, False)
 
         print_mock.assert_called()
+
+    @patch('src.cli.Gorrion')
+    @patch('builtins.print')
+    def test_playing_album(self, print_mock, gorrion_mock):
+        gorrion_mock.return_value.playing_album.return_value = PublishedTweet('123', 'song', None)
+
+        cli = CLI()
+        cli.playing_album(True)
+
+        print_mock.assert_any_call('[---------------------- Album ----------------------]')
+        print_mock.assert_any_call('song')
+
+    @patch('src.cli.Gorrion')
+    @patch('builtins.print')
+    def test_playing_album_when_spotify_error(self, print_mock, gorrion_mock):
+        gorrion_mock.return_value.playing_album.side_effect = SpotifyApiError('spotify error')
+
+        cli = CLI()
+        cli.playing_album(True)
+
+        print_mock.assert_called()
