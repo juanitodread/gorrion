@@ -11,6 +11,7 @@ from src.clients.spotify import (
 )
 from src.clients.musixmatch import Song, Lyric
 from src.clients.twitter import TwitterLocal, PublishedTweet
+from src.templates import TweetSongConfig, TweetAlbumConfig
 
 
 @pytest.fixture()
@@ -77,7 +78,7 @@ class TestGorrion:
         assert tweet == PublishedTweet(
             id_='fake-status-id',
             tweet=(
-                'Now listening 🔊🎶: \n\n'
+                'Now listening 🔊🎶:\n\n'
                 'Track: 1. Peligro\n'
                 'Album: Pa morirse de amor\n'
                 'Artist: Ely Guerra\n\n'
@@ -124,7 +125,7 @@ class TestGorrion:
             PublishedTweet(
                 id_='fake-status-id',
                 tweet=(
-                    'Now listening 🔊🎶: \n\n'
+                    'Now listening 🔊🎶:\n\n'
                     'Track: 1. Peligro\n'
                     'Album: Pa morirse de amor\n'
                     'Artist: Ely Guerra\n\n'
@@ -173,7 +174,7 @@ class TestGorrion:
         assert tweet == PublishedTweet(
             id_='fake-status-id',
             tweet=(
-                'Now listening 🔊🎶: \n\n'
+                'Now listening 🔊🎶:\n\n'
                 'Album: Pa morirse de amor\n'
                 'Artist: Ely Guerra\n'
                 'Tracks: 19\n'
@@ -270,7 +271,7 @@ class TestGorrion:
         assert track_tweet == PublishedTweet(
             id_='fake-status-id',
             tweet=(
-                'Now listening 🔊🎶: \n\n'
+                'Now listening 🔊🎶:\n\n'
                 'Track: 1. Peligro\n'
                 'Album: Pa morirse de amor\n'
                 'Artist: Ely Guerra\n\n'
@@ -330,7 +331,7 @@ class TestGorrion:
         assert album_tweet == PublishedTweet(
             id_='fake-status-id',
             tweet=(
-                'Now listening 🔊🎶: \n\n'
+                'Now listening 🔊🎶:\n\n'
                 'Album: Pa morirse de amor\n'
                 'Artist: Ely Guerra\n'
                 'Tracks: 19\n'
@@ -363,22 +364,23 @@ class TestGorrion:
             )
         )
 
-    def test_full_status(self, twitter, track):
+    def test_full_song_status(self, twitter, track):
         gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
-        status = gorrion.full_status(track)
-        assert status == ('Now listening 🔊🎶: \n\n'
+        status = gorrion.build_status(track, TweetSongConfig())
+        assert status == ('Now listening 🔊🎶:\n\n'
                           'Track: 1. Peligro\n'
                           'Album: Pa morirse de amor\n'
                           'Artist: Ely Guerra\n\n'
                           '#gorrion #NowPlaying #ElyGuerra\n\n'
                           'http://spotify.com/track/1')
 
-    def test_short_status(self, twitter, track):
+    def test_short_song_status(self, twitter, track):
+        twitter.MAX_TWEET_LENGTH = 10
         gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
-        status = gorrion.short_status(track)
-        assert status == ('Now listening 🔊🎶: \n\n'
+        status = gorrion.build_status(track, TweetSongConfig())
+        assert status == ('Now listening 🔊🎶:\n\n'
                           'Track: 1. Peligro\n'
                           'Album: Pa morirse de amor\n'
                           'Artist: Ely Guerra\n\n'
@@ -388,8 +390,8 @@ class TestGorrion:
     def test_full_album_status(self, twitter, track):
         gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
-        status = gorrion.full_album_status(track)
-        assert status == ('Now listening 🔊🎶: \n\n'
+        status = gorrion.build_status(track, TweetAlbumConfig())
+        assert status == ('Now listening 🔊🎶:\n\n'
                           'Album: Pa morirse de amor\n'
                           'Artist: Ely Guerra\n'
                           'Tracks: 19\n'
@@ -398,10 +400,11 @@ class TestGorrion:
                           'http://spotify.com/album/11?si=g')
 
     def test_short_album_status(self, twitter, track):
+        twitter.MAX_TWEET_LENGTH = 10
         gorrion = Gorrion(MagicMock(), twitter, MagicMock())
 
-        status = gorrion.short_album_status(track)
-        assert status == ('Now listening 🔊🎶: \n\n'
+        status = gorrion.build_status(track, TweetAlbumConfig())
+        assert status == ('Now listening 🔊🎶:\n\n'
                           'Album: Pa morirse de amor\n'
                           'Artist: Ely Guerra\n'
                           'Tracks: 19\n'

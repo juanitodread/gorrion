@@ -11,6 +11,12 @@ from src.clients.musixmatch import (
     Song,
     MusixmatchApiError,
 )
+from src.templates import (
+    TweetTemplate,
+    TweetConfig,
+    TweetSongConfig,
+    TweetAlbumConfig,
+)
 
 
 class Gorrion:
@@ -62,11 +68,7 @@ class Gorrion:
         return song
 
     def publish_track(self, track: Track) -> PublishedTweet:
-        tweet_track = self.full_status(track)
-
-        if not self.is_valid_tweet_status(tweet_track):
-            tweet_track = self.short_status(track)
-
+        tweet_track = self.build_status(track, TweetSongConfig())
         tweeted_track = self._twitter.post(tweet_track)
         tweeted_track.entity = track
 
@@ -89,49 +91,23 @@ class Gorrion:
         return published_tweets
 
     def publish_album(self, track: Track) -> PublishedTweet:
-        tweet_album = self.full_album_status(track)
-
-        if not self.is_valid_tweet_status(tweet_album):
-            tweet_album = self.short_album_status(track)
+        tweet_album = self.build_status(track, TweetAlbumConfig())
 
         tweeted_album = self._twitter.post(tweet_album)
         tweeted_album.entity = track
 
         return tweeted_album
 
-    def full_status(self, track: Track) -> str:
-        return ('Now listening 🔊🎶: \n'
-                f'\nTrack: {track.track_number}. {track.name}'
-                f'\nAlbum: {track.album.name}'
-                f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
-                f'\n\n#gorrion #NowPlaying {self._get_artists_hashtag(track.artists)}'
-                f'\n\n{track.public_url}')
+    def build_status(self, track: Track, config: TweetConfig):
+        template = TweetTemplate(track, config)
+        tweet_status = template.to_tweet()
 
-    def short_status(self, track: Track) -> str:
-        return ('Now listening 🔊🎶: \n'
-                f'\nTrack: {track.track_number}. {track.name}'
-                f'\nAlbum: {track.album.name}'
-                f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
-                f'\n\n#gorrion #NowPlaying'
-                f'\n\n{track.public_url}')
+        if not self.is_valid_tweet_status(tweet_status):
+            config.footer_config.with_artists_hashtag = False
+            template = TweetTemplate(track, config)
+            tweet_status = template.to_tweet()
 
-    def full_album_status(self, track: Track) -> str:
-        return ('Now listening 🔊🎶: \n'
-                f'\nAlbum: {track.album.name}'
-                f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
-                f'\nTracks: {track.album.total_tracks}'
-                f'\nRelease: {self._get_year(track.album.release_date)}'
-                f'\n\n#gorrion #NowPlaying {self._to_hashtag(track.album.name)} {self._get_artists_hashtag(track.artists)}'
-                f'\n\n{track.album.public_url}?si=g')
-
-    def short_album_status(self, track: Track) -> str:
-        return ('Now listening 🔊🎶: \n'
-                f'\nAlbum: {track.album.name}'
-                f'\nArtist: {", ".join([artist.name for artist in track.artists])}'
-                f'\nTracks: {track.album.total_tracks}'
-                f'\nRelease: {self._get_year(track.album.release_date)}'
-                f'\n\n#gorrion #NowPlaying {self._to_hashtag(track.album.name)}'
-                f'\n\n{track.album.public_url}?si=g')
+        return tweet_status
 
     def is_valid_tweet_status(self, status: str) -> bool:
         return len(status) <= self._twitter.max_tweet_length
@@ -149,21 +125,6 @@ class Gorrion:
                 lyric_tweets += new_paragraphs
 
         return lyric_tweets
-
-    def _get_artists_hashtag(self, artists: list) -> str:
-        artists_hashtag = [self._to_hashtag(artist.name)
-                           for artist in artists]
-        return ' '.join(artists_hashtag)
-
-    def _get_year(self, release_date: str) -> str:
-        return release_date.split('-')[0]
-
-    def _to_hashtag(self, text: str) -> str:
-        words = ''.join(word.capitalize() for word in text.split(' '))
-        words = (words.replace('-', '')
-                      .replace(',', '')
-                      .replace(':', ''))
-        return f'#{words}'
 
     def _chunks(self, elements: list, size: int) -> list:
         return [elements[element:element + size]
