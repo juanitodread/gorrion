@@ -30,6 +30,9 @@ class TelegramBot:
         if text == '/lyric':
             self.playing_with_lyrics(chat_id, False, False)
             return
+        if text == '/album':
+            self.playing_album(chat_id, False)
+            return
         if text == '/about':
             self.about(chat_id)
             return
@@ -71,6 +74,8 @@ class TelegramBot:
             tweets = gorrion.playing_with_lyrics()
             song, *lyrics = tweets
 
+            print('SONG', song)
+
             self._bot.send_message(
                 chat_id=chat_id,
                 text=song.tweet
@@ -87,6 +92,22 @@ class TelegramBot:
                 text=f'{error}',
             )
 
+    def playing_album(self, chat_id: str, local_mode: bool) -> None:
+        try:
+            gorrion = self._build_gorrion(local_mode, False)
+
+            song = gorrion.playing_album()
+
+            self._bot.send_message(
+                chat_id=chat_id,
+                text=song.tweet
+            )
+        except SpotifyApiError as error:
+            self._bot.send_message(
+                chat_id=chat_id,
+                text=f'{error}',
+            )
+
     def about(self, chat_id: str) -> None:
         self._bot.send_message(
             chat_id=chat_id,
@@ -94,6 +115,7 @@ class TelegramBot:
         )
 
     def invalid_command(self, chat_id: str) -> None:
+        print('CALLING THE INVALID COMMAND', self._bot)
         self._bot.send_message(
             chat_id=chat_id,
             text='Invalid command'
@@ -116,7 +138,7 @@ class TelegramBot:
         return Gorrion(spotify, twitter, musixmatch)
 
     def _get_commands(self) -> list:
-        return ['/start', '/playing', '/lyric', '/about']
+        return ['/start', '/playing', '/lyric', '/album', '/about']
 
 
 def do_work(event, context) -> dict:
