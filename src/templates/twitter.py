@@ -9,7 +9,7 @@ from src.templates.config import (
 
 
 class TweetTemplate:
-    def __init__(self, track: Track, config: TweetConfig):
+    def __init__(self, track: Track, config: TweetConfig) -> None:
         self._track = track
         self._config = config
 
@@ -24,16 +24,16 @@ class TweetTemplate:
         return 'Now listening 🔊🎶:\n\n' if self._config.with_header else ''
 
     def body(self) -> str:
-        return f'{self.build_body()}\n' if self._config.with_body else ''
+        return f'{self._build_body()}\n' if self._config.with_body else ''
 
     def footer(self) -> str:
-        return f'{self.build_footer()}' if self._config.with_footer else ''
+        return f'{self._build_footer()}' if self._config.with_footer else ''
 
-    def build_body(self) -> str:
+    def _build_body(self) -> str:
         body = BodyTemplate(self._track, self._config.body_config)
         return body.to_body()
 
-    def build_footer(self) -> str:
+    def _build_footer(self) -> str:
         footer = FooterTemplate(self._track, self._config.footer_config)
         return footer.to_footer()
 
@@ -45,22 +45,22 @@ class BodyTemplate:
 
     def to_body(self) -> str:
         return (
-            f'{self.build_track()}'
-            f'{self.build_album()}'
-            f'{self.build_artists()}'
-            f'{self.build_tracks()}'
-            f'{self.build_release_date()}'
+            f'{self.track()}'
+            f'{self.album()}'
+            f'{self.artists()}'
+            f'{self.tracks()}'
+            f'{self.release_date()}'
         )
 
-    def build_track(self) -> str:
+    def track(self) -> str:
         return (f'Track: {self._track.track_number}. {self._track.name}\n'
                 if self._config.with_track else '')
 
-    def build_album(self) -> str:
+    def album(self) -> str:
         return (f'Album: {self._track.album.name}\n'
                 if self._config.with_album else '')
 
-    def build_artists(self) -> str:
+    def artists(self) -> str:
         if not self._config.with_artists:
             return ''
 
@@ -68,11 +68,11 @@ class BodyTemplate:
                                   for artist in self._track.artists])
         return f'Artist: {artist_names}\n'
 
-    def build_tracks(self) -> str:
+    def tracks(self) -> str:
         return (f'Tracks: {self._track.album.total_tracks}\n'
                 if self._config.with_tracks else '')
 
-    def build_release_date(self) -> str:
+    def release_date(self) -> str:
         if not self._config.with_release_date:
             return ''
 
@@ -87,28 +87,28 @@ class FooterTemplate:
 
     def to_footer(self) -> str:
         return (
-            f'{self.build_hashtags_section()}'
-            f'\n\n'
-            f'{self.build_song_media_link()}'
-            f'{self.build_album_media_link()}'
+            f'{self.hashtags()}'
+            f'{self.song_media_link()}'
+            f'{self.album_media_link()}'
         )
 
-    def build_hashtags_section(self) -> str:
-        return (
-            f'{self.build_gorrion_hashtags()}'
-            f'{self.build_album_hashtags()}'
-            f'{self.build_artists_hashtags()}'
-        ).strip()
+    def hashtags(self) -> str:
+        hashtags = (
+            f'{self.gorrion_hashtags()}'
+            f'{self.album_hashtags()}'
+            f'{self.artists_hashtags()}'
+        )
+        return f'{hashtags.strip()}\n\n' if len(hashtags) > 0 else ''
 
-    def build_gorrion_hashtags(self) -> str:
+    def gorrion_hashtags(self) -> str:
         return ('#gorrion #NowPlaying '
                 if self._config.with_gorrion_hashtags else '')
 
-    def build_album_hashtags(self) -> str:
+    def album_hashtags(self) -> str:
         return (f'{self._build_hashtag(self._track.album.name)} '
                 if self._config.with_album_hashtag else '')
 
-    def build_artists_hashtags(self) -> str:
+    def artists_hashtags(self) -> str:
         if not self._config.with_artists_hashtag:
             return ''
 
@@ -116,15 +116,18 @@ class FooterTemplate:
                             for artist in self._track.artists]
         return ' '.join(artists_hashtags)
 
-    def build_song_media_link(self) -> str:
+    def song_media_link(self) -> str:
         return (f'{self._track.public_url}'
                 if self._config.with_song_media_link else '')
 
-    def build_album_media_link(self) -> str:
+    def album_media_link(self) -> str:
         return (f'{self._track.album.public_url}?si=g'
                 if self._config.with_album_media_link else '')
 
     def _build_hashtag(self, text: str) -> str:
+        if not text or len(text) == 0:
+            return ''
+
         words = text.split(' ')
 
         hashtags = []
