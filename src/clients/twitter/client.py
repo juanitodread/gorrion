@@ -8,6 +8,7 @@ from src.clients.twitter.models import PublishedTweet
 
 class Twitter:
     def __init__(self, config: TwitterConfig) -> None:
+        self.MAX_TWEET_LENGTH = 280
         self._consumer_key = config.consumer_key
         self._consumer_secret = config.consumer_secret
         self._access_token = config.access_token
@@ -38,7 +39,7 @@ class Twitter:
 
     @property
     def max_tweet_length(self) -> int:
-        return 280
+        return self.MAX_TWEET_LENGTH
 
 
 class TwitterLocal(Twitter):
