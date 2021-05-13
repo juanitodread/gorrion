@@ -24,15 +24,26 @@ class TelegramBot:
         if text == '/start':
             self.start(chat_id)
             return
-        if text == '/playing':
-            self.playing(chat_id, False)
-            return
-        if text == '/lyric':
-            self.playing_with_lyrics(chat_id, False, False)
-            return
         if text == '/about':
             self.about(chat_id)
             return
+
+        try:
+            gorrion = self._build_gorrion(False, False)
+            if text == '/playing':
+                self.playing(chat_id, gorrion)
+                return
+            if text == '/lyric':
+                self.playing_with_lyrics(chat_id, gorrion)
+                return
+            if text == '/album':
+                self.playing_album(chat_id, gorrion)
+                return
+        except SpotifyApiError as error:
+            self._bot.send_message(
+                chat_id=chat_id,
+                text=f'{error}',
+            )
 
     def start(self, chat_id: str) -> None:
         self._bot.send_message(
@@ -45,47 +56,36 @@ class TelegramBot:
             text=f'Supported commands are: \n\n{commands}',
         )
 
-    def playing(self, chat_id: str, local_mode: bool) -> None:
-        try:
-            gorrion = self._build_gorrion(local_mode, False)
+    def playing(self, chat_id: str, gorrion: Gorrion) -> None:
+        song = gorrion.playing()
 
-            song = gorrion.playing()
+        self._bot.send_message(
+            chat_id=chat_id,
+            text=song.tweet
+        )
 
-            self._bot.send_message(
-                chat_id=chat_id,
-                text=song.tweet
-            )
-        except SpotifyApiError as error:
-            self._bot.send_message(
-                chat_id=chat_id,
-                text=f'{error}',
-            )
+    def playing_with_lyrics(self, chat_id: str, gorrion: Gorrion) -> None:
+        tweets = gorrion.playing_with_lyrics()
+        song, *lyrics = tweets
 
-    def playing_with_lyrics(self,
-                            chat_id: str,
-                            local_mode: bool,
-                            delay_mode: bool) -> None:
-        try:
-            gorrion = self._build_gorrion(local_mode, delay_mode)
+        self._bot.send_message(
+            chat_id=chat_id,
+            text=song.tweet
+        )
+        if lyrics:
+            for lyric in lyrics:
+                self._bot.send_message(
+                    chat_id=chat_id,
+                    text=lyric.tweet
+                )
 
-            tweets = gorrion.playing_with_lyrics()
-            song, *lyrics = tweets
+    def playing_album(self, chat_id: str, gorrion: Gorrion) -> None:
+        song = gorrion.playing_album()
 
-            self._bot.send_message(
-                chat_id=chat_id,
-                text=song.tweet
-            )
-            if lyrics:
-                for lyric in lyrics:
-                    self._bot.send_message(
-                        chat_id=chat_id,
-                        text=lyric.tweet
-                    )
-        except SpotifyApiError as error:
-            self._bot.send_message(
-                chat_id=chat_id,
-                text=f'{error}',
-            )
+        self._bot.send_message(
+            chat_id=chat_id,
+            text=song.tweet
+        )
 
     def about(self, chat_id: str) -> None:
         self._bot.send_message(
@@ -110,12 +110,13 @@ class TelegramBot:
 
         twitter_config = Config.get_twitter_config()
         twitter_config.retweet_delay = delay_mode
-        twitter = TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config)
+        twitter = (TwitterLocal(twitter_config)
+                   if local_mode else Twitter(twitter_config))
 
         return Gorrion(spotify, twitter, musixmatch)
 
     def _get_commands(self) -> list:
-        return ['/start', '/playing', '/lyric', '/about']
+        return ['/start', '/playing', '/lyric', '/album', '/about']
 
 
 def do_work(event, context) -> dict:

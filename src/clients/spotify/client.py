@@ -60,19 +60,22 @@ class Spotify:
             id_=json_response['item']['id'],
             name=json_response['item']['name'],
             href=json_response['item']['href'],
-            track_number=json_response['item']['track_number'],
             public_url=json_response['item']['external_urls']['spotify'],
+            track_number=json_response['item']['track_number'],
             album=Album(
                 id_=json_response['item']['album']['id'],
                 name=json_response['item']['album']['name'],
                 href=json_response['item']['album']['href'],
+                public_url=json_response['item']['album']['external_urls']['spotify'],
                 release_date=json_response['item']['album']['release_date'],
+                total_tracks=json_response['item']['album']['total_tracks'],
             ),
             artists=[
                 Artist(
                     id_=artist['id'],
                     name=artist['name'],
                     href=artist['href'],
+                    public_url=artist['external_urls']['spotify'],
                 )
                 for artist in json_response['item']['artists']
             ]

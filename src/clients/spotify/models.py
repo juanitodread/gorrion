@@ -6,11 +6,13 @@ class Entity:
     id_: str
     name: str
     href: str
+    public_url: str
 
 
 @dataclass
 class Album(Entity):
     release_date: str
+    total_tracks: int
 
 
 @dataclass
@@ -21,6 +23,5 @@ class Artist(Entity):
 @dataclass
 class Track(Entity):
     track_number: int
-    public_url: str
     album: Album
     artists: list
