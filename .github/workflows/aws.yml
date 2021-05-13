@@ -2,7 +2,7 @@ name: Deploy to Amazon Lambda
 
 on:
   push:
-    branches: [ telegram-bot ]
+    branches: [ master ]
 
 jobs:
   deploy:
