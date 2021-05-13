@@ -340,8 +340,8 @@ class TestFooterTemplate:
         assert footer_template.gorrion_hashtags() == ''
 
     def test_album_hashtags_with_album_hashtag_true(self,
-                                                     track,
-                                                     tweet_config):
+                                                    track,
+                                                    tweet_config):
         tweet_config.footer_config.with_album_hashtag = True
         footer_template = FooterTemplate(track, tweet_config.footer_config)
 
