@@ -87,29 +87,31 @@ class TestSpotify:
             code=200,
             json=json_response
         )
-        track = spotify.get_current_track()
+        album = spotify.get_current_track()
 
-        assert track == Track(
-            '1',
-            'Peligro',
+        assert album == Album(
+            '11',
+            'Pa morirse de amor',
             '',
-            'https://open.spotify.com/track/0KSsZsTzIpqTRtbMaI67k1',
-            1,
-            Album(
-                '11',
-                'Pa morirse de amor',
-                '',
-                'https://open.spotify.com/album/0KSsZsTzIpqTRtbMaI67k1',
-                '2006-01-01',
-                19,
-            ),
-            [
+            'https://open.spotify.com/album/0KSsZsTzIpqTRtbMaI67k1',
+            '2006-01-01',
+            19,
+            artists=[
                 Artist(
                     '12',
                     'Ely Guerra',
                     '',
                     'https://open.spotify.com/artist/0KSsZsTzIpqTRtbMaI67k1',
                 ),
+            ],
+            tracks=[
+                Track(
+                    '1',
+                    'Peligro',
+                    '',
+                    'https://open.spotify.com/track/0KSsZsTzIpqTRtbMaI67k1',
+                    1,
+                )
             ]
         )
 

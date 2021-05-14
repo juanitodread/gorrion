@@ -38,7 +38,7 @@ class Spotify:
 
         return json_response['access_token']
 
-    def get_current_track(self) -> Track:
+    def get_current_track(self) -> Album:
         access_token = self.refresh_access_token()
 
         response = requests.get(
@@ -56,20 +56,22 @@ class Spotify:
 
         json_response = response.json()
 
-        track = Track(
-            id_=json_response['item']['id'],
-            name=json_response['item']['name'],
-            href=json_response['item']['href'],
-            public_url=json_response['item']['external_urls']['spotify'],
-            track_number=json_response['item']['track_number'],
-            album=Album(
-                id_=json_response['item']['album']['id'],
-                name=json_response['item']['album']['name'],
-                href=json_response['item']['album']['href'],
-                public_url=json_response['item']['album']['external_urls']['spotify'],
-                release_date=json_response['item']['album']['release_date'],
-                total_tracks=json_response['item']['album']['total_tracks'],
-            ),
+        album = Album(
+            id_=json_response['item']['album']['id'],
+            name=json_response['item']['album']['name'],
+            href=json_response['item']['album']['href'],
+            public_url=json_response['item']['album']['external_urls']['spotify'],
+            release_date=json_response['item']['album']['release_date'],
+            total_tracks=json_response['item']['album']['total_tracks'],
+            tracks=[
+                Track(
+                    id_=json_response['item']['id'],
+                    name=json_response['item']['name'],
+                    href=json_response['item']['href'],
+                    public_url=json_response['item']['external_urls']['spotify'],
+                    track_number=json_response['item']['track_number'],
+                )
+            ],
             artists=[
                 Artist(
                     id_=artist['id'],
@@ -81,7 +83,7 @@ class Spotify:
             ]
         )
 
-        return track
+        return album
 
     def get_basic_auth_token(self) -> str:
         return self.to_base64(f'{self._client_id}:{self._client_secret}')

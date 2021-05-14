@@ -1,6 +1,6 @@
 import re
 
-from src.clients.spotify import Track
+from src.clients.spotify import Album
 from src.templates.config import (
     TweetConfig,
     TweetBodyConfig,
@@ -9,8 +9,8 @@ from src.templates.config import (
 
 
 class TweetTemplate:
-    def __init__(self, track: Track, config: TweetConfig) -> None:
-        self._track = track
+    def __init__(self, album: Album, config: TweetConfig) -> None:
+        self._album = album
         self._config = config
 
     def to_tweet(self) -> str:
@@ -30,17 +30,17 @@ class TweetTemplate:
         return f'{self._build_footer()}' if self._config.with_footer else ''
 
     def _build_body(self) -> str:
-        body = BodyTemplate(self._track, self._config.body_config)
+        body = BodyTemplate(self._album, self._config.body_config)
         return body.to_body()
 
     def _build_footer(self) -> str:
-        footer = FooterTemplate(self._track, self._config.footer_config)
+        footer = FooterTemplate(self._album, self._config.footer_config)
         return footer.to_footer()
 
 
 class BodyTemplate:
-    def __init__(self, track: Track, config: TweetBodyConfig) -> None:
-        self._track = track
+    def __init__(self, album: Album, config: TweetBodyConfig) -> None:
+        self._album = album
         self._config = config
 
     def to_body(self) -> str:
@@ -53,11 +53,12 @@ class BodyTemplate:
         )
 
     def track(self) -> str:
-        return (f'Track: {self._track.track_number}. {self._track.name}\n'
+        track = self._album.tracks[0]
+        return (f'Track: {track.track_number}. {track.name}\n'
                 if self._config.with_track else '')
 
     def album(self) -> str:
-        return (f'Album: {self._track.album.name}\n'
+        return (f'Album: {self._album.name}\n'
                 if self._config.with_album else '')
 
     def artists(self) -> str:
@@ -65,24 +66,24 @@ class BodyTemplate:
             return ''
 
         artist_names = ', '.join([artist.name
-                                  for artist in self._track.artists])
+                                  for artist in self._album.artists])
         return f'Artist: {artist_names}\n'
 
     def tracks(self) -> str:
-        return (f'Tracks: {self._track.album.total_tracks}\n'
+        return (f'Tracks: {self._album.total_tracks}\n'
                 if self._config.with_tracks else '')
 
     def release_date(self) -> str:
         if not self._config.with_release_date:
             return ''
 
-        year = self._track.album.release_date.split('-')[0]
+        year = self._album.release_date.split('-')[0]
         return f'Release: {year}\n'
 
 
 class FooterTemplate:
-    def __init__(self, track: Track, config: TweetFooterConfig) -> None:
-        self._track = track
+    def __init__(self, album: Album, config: TweetFooterConfig) -> None:
+        self._album = album
         self._config = config
 
     def to_footer(self) -> str:
@@ -105,7 +106,7 @@ class FooterTemplate:
                 if self._config.with_gorrion_hashtags else '')
 
     def album_hashtags(self) -> str:
-        return (f'{self._build_hashtag(self._track.album.name)} '
+        return (f'{self._build_hashtag(self._album.name)} '
                 if self._config.with_album_hashtag else '')
 
     def artists_hashtags(self) -> str:
@@ -113,15 +114,16 @@ class FooterTemplate:
             return ''
 
         artists_hashtags = [self._build_hashtag(artist.name)
-                            for artist in self._track.artists]
+                            for artist in self._album.artists]
         return ' '.join(artists_hashtags)
 
     def song_media_link(self) -> str:
-        return (f'{self._track.public_url}'
+        track = self._album.tracks[0]
+        return (f'{track.public_url}'
                 if self._config.with_song_media_link else '')
 
     def album_media_link(self) -> str:
-        return (f'{self._track.album.public_url}?si=g'
+        return (f'{self._album.public_url}?si=g'
                 if self._config.with_album_media_link else '')
 
     def _build_hashtag(self, text: str) -> str:

@@ -13,6 +13,8 @@ class Entity:
 class Album(Entity):
     release_date: str
     total_tracks: int
+    artists: list
+    tracks: list
 
 
 @dataclass
@@ -23,5 +25,3 @@ class Artist(Entity):
 @dataclass
 class Track(Entity):
     track_number: int
-    album: Album
-    artists: list
