@@ -393,8 +393,8 @@ class TestFooterTemplate:
         tweet_config.footer_config.with_album_media_link = True
         footer_template = FooterTemplate(track, tweet_config.footer_config)
 
-        assert (footer_template.album_media_link() ==
-                'http://spotify.com/album/11?si=g')
+        assert (footer_template
+                .album_media_link() == 'http://spotify.com/album/11?si=g')
 
     def test_album_media_link_with_album_media_link_false(self,
                                                           track,
@@ -412,7 +412,5 @@ class TestFooterTemplate:
         assert footer_template._build_hashtag('digit-only') == '#Digitonly'
         assert footer_template._build_hashtag('no more') == '#NoMore'
         assert footer_template._build_hashtag('  alone   ') == '#Alone'
-        assert (
-            footer_template._build_hashtag('thIS iS a AM vAlID') ==
-            '#ThisIsAAMValid'
-        )
+        assert (footer_template
+                ._build_hashtag('thIS iS a AM vAlID') == '#ThisIsAAMValid')
