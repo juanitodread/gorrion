@@ -8,6 +8,8 @@ from src.gorrion import Gorrion
 
 
 class CLI:
+    COMMANDS = ('playing', 'lyric', 'album', 'album-tracks')
+
     def playing(self, local_mode: bool) -> None:
         try:
             gorrion = self._build_gorrion(local_mode, False)
@@ -72,7 +74,7 @@ class CLI:
         parser.add_argument(
             'command',
             type=str,
-            help='The available commands to execute: [playing, lyric, album].'
+            help=f'The available commands to execute: {CLI.COMMANDS}.'
         )
         parser.add_argument(
             '-l',
@@ -100,18 +102,15 @@ if __name__ == "__main__":
     local_mode = args.local
     delay_mode = args.delay
 
-    valid_commands = ('playing', 'lyric', 'album')
-    if command not in valid_commands:
-        print(f'Invalid command. Use: {valid_commands}')
+    if command not in CLI.COMMANDS:
+        print(f'Invalid command. Use: {CLI.COMMANDS}')
         quit()
-
     if command == 'playing':
         cli.playing(local_mode)
         quit()
     if command == 'lyric':
         cli.playing_with_lyrics(local_mode, delay_mode)
         quit()
-
     if command == 'album':
         cli.playing_album(local_mode)
         quit()
