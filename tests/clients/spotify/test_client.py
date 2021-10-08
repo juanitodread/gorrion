@@ -61,6 +61,8 @@ class TestSpotify:
                 'external_urls': {
                     'spotify': 'https://open.spotify.com/track/0KSsZsTzIpqTRtbMaI67k1',
                 },
+                'disc_number': 1,
+                'duration_ms': 1000,
                 'album': {
                     'id': '11',
                     'name': 'Pa morirse de amor',
@@ -87,30 +89,34 @@ class TestSpotify:
             code=200,
             json=json_response
         )
-        track = spotify.get_current_track()
+        album = spotify.get_current_track()
 
-        assert track == Track(
-            '1',
-            'Peligro',
-            '',
-            'https://open.spotify.com/track/0KSsZsTzIpqTRtbMaI67k1',
-            1,
-            Album(
-                '11',
-                'Pa morirse de amor',
-                '',
-                'https://open.spotify.com/album/0KSsZsTzIpqTRtbMaI67k1',
-                '2006-01-01',
-                19,
-            ),
-            [
+        assert album == Album(
+            id_='11',
+            name='Pa morirse de amor',
+            href='',
+            public_url='https://open.spotify.com/album/0KSsZsTzIpqTRtbMaI67k1',
+            release_date='2006-01-01',
+            total_tracks=19,
+            artists=[
                 Artist(
-                    '12',
-                    'Ely Guerra',
-                    '',
-                    'https://open.spotify.com/artist/0KSsZsTzIpqTRtbMaI67k1',
-                ),
-            ]
+                    id_='12',
+                    name='Ely Guerra',
+                    href='',
+                    public_url='https://open.spotify.com/artist/0KSsZsTzIpqTRtbMaI67k1',
+                )
+            ],
+            tracks=[
+                Track(
+                    id_='1',
+                    name='Peligro',
+                    href='',
+                    public_url='https://open.spotify.com/track/0KSsZsTzIpqTRtbMaI67k1',
+                    disc_number=1,
+                    track_number=1,
+                    duration=1000,
+                )
+            ],
         )
 
     @patch('src.clients.spotify.client.requests')

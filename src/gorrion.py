@@ -1,6 +1,6 @@
 from src.clients.spotify import (
     Spotify,
-    Track,
+    Album,
 )
 from src.clients.twitter import (
     Twitter,
@@ -29,34 +29,34 @@ class Gorrion:
         self._musixmatch = musixmatch
 
     def playing(self) -> PublishedTweet:
-        current_track = self.get_playing_track()
-        tweet = self.publish_track(current_track)
+        current_album = self.get_playing_album()
+        tweet = self.publish_track(current_album)
 
         return tweet
 
     def playing_with_lyrics(self) -> list:
-        current_track_tweet = self.playing()
+        current_album_tweet = self.playing()
 
-        song = self.get_lyric(current_track_tweet.entity)
-        lyrics_tweets = self.publish_lyrics(current_track_tweet, song)
+        song = self.get_lyric(current_album_tweet.entity)
+        lyrics_tweets = self.publish_lyrics(current_album_tweet, song)
 
-        return [current_track_tweet, *lyrics_tweets]
+        return [current_album_tweet, *lyrics_tweets]
 
     def playing_album(self) -> PublishedTweet:
-        current_track = self.get_playing_track()
-        tweet = self.publish_album(current_track)
+        current_album = self.get_playing_album()
+        tweet = self.publish_album(current_album)
 
         return tweet
 
-    def get_playing_track(self) -> Track:
-        current_track = self._spotify.get_current_track()
-        return current_track
+    def get_playing_album(self) -> Album:
+        current_album = self._spotify.get_current_track()
+        return current_album
 
-    def get_lyric(self, track: Track) -> Song:
+    def get_lyric(self, album: Album) -> Song:
         song = Song(
-            track.name,
-            track.artists[0].name,
-            track.album.name,
+            album.tracks[0].name,
+            album.artists[0].name,
+            album.name,
         )
 
         try:
@@ -67,10 +67,10 @@ class Gorrion:
 
         return song
 
-    def publish_track(self, track: Track) -> PublishedTweet:
-        tweet_track = self.build_status(track, TweetSongConfig())
+    def publish_track(self, album: Album) -> PublishedTweet:
+        tweet_track = self.build_status(album, TweetSongConfig())
         tweeted_track = self._twitter.post(tweet_track)
-        tweeted_track.entity = track
+        tweeted_track.entity = album
 
         return tweeted_track
 
@@ -90,21 +90,21 @@ class Gorrion:
 
         return published_tweets
 
-    def publish_album(self, track: Track) -> PublishedTweet:
-        tweet_album = self.build_status(track, TweetAlbumConfig())
+    def publish_album(self, album: Album) -> PublishedTweet:
+        tweet_album = self.build_status(album, TweetAlbumConfig())
 
         tweeted_album = self._twitter.post(tweet_album)
-        tweeted_album.entity = track
+        tweeted_album.entity = album
 
         return tweeted_album
 
-    def build_status(self, track: Track, config: TweetConfig):
-        template = TweetTemplate(track, config)
+    def build_status(self, album: Album, config: TweetConfig):
+        template = TweetTemplate(album, config)
         tweet_status = template.to_tweet()
 
         if not self.is_valid_tweet_status(tweet_status):
             config.footer_config.with_artists_hashtag = False
-            template = TweetTemplate(track, config)
+            template = TweetTemplate(album, config)
             tweet_status = template.to_tweet()
 
         return tweet_status

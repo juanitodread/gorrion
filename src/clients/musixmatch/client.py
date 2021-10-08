@@ -45,14 +45,14 @@ class Musixmatch:
             raise SongHasNoLyrics(song)
 
         tracks = [Track(
-                    id_=track['track']['track_id'],
-                    common_id=track['track']['commontrack_id'],
-                    name=track['track']['track_name'],
-                    instrumental=track['track']['instrumental'],
-                    explicit=track['track']['explicit'],
-                    album=track['track']['album_name'],
-                    artist=track['track']['artist_name'],
-                ) for track in body['track_list']]
+            id_=track['track']['track_id'],
+            common_id=track['track']['commontrack_id'],
+            name=track['track']['track_name'],
+            instrumental=track['track']['instrumental'],
+            explicit=track['track']['explicit'],
+            album=track['track']['album_name'],
+            artist=track['track']['artist_name'],
+        ) for track in body['track_list']]
 
         song.tracks = tracks
         song.tracks_length = len(tracks)

@@ -21,28 +21,32 @@ def twitter():
 
 @pytest.fixture()
 def track():
-    return Track(
-        '1',
-        'Peligro',
-        '',
-        'http://spotify.com/track/1',
-        1,
-        Album(
-            '11',
-            'Pa morirse de amor',
-            '',
-            'http://spotify.com/album/11',
-            '2006-01-01',
-            19,
-        ),
-        [
+    return Album(
+        id_='11',
+        name='Pa morirse de amor',
+        href='',
+        public_url='http://spotify.com/album/11',
+        release_date='2006-01-01',
+        total_tracks=19,
+        artists=[
             Artist(
-                '12',
-                'Ely Guerra',
-                '',
-                'http://spotify.com/artist/12',
-            ),
-        ]
+                id_='12',
+                name='Ely Guerra',
+                href='',
+                public_url='http://spotify.com/artist/12',
+            )
+        ],
+        tracks=[
+            Track(
+                id_='1',
+                name='Peligro',
+                href='',
+                public_url='http://spotify.com/track/1',
+                disc_number=1,
+                track_number=1,
+                duration=1000,
+            )
+        ],
     )
 
 
@@ -85,28 +89,32 @@ class TestGorrion:
                 '#gorrion #NowPlaying #ElyGuerra\n\n'
                 'http://spotify.com/track/1'
             ),
-            entity=Track(
-                id_='1',
-                name='Peligro',
+            entity=Album(
+                id_='11',
+                name='Pa morirse de amor',
                 href='',
-                public_url='http://spotify.com/track/1',
-                track_number=1,
-                album=Album(
-                    id_='11',
-                    name='Pa morirse de amor',
-                    href='',
-                    public_url='http://spotify.com/album/11',
-                    release_date='2006-01-01',
-                    total_tracks=19,
-                ),
+                public_url='http://spotify.com/album/11',
+                release_date='2006-01-01',
+                total_tracks=19,
                 artists=[
                     Artist(
                         id_='12',
                         name='Ely Guerra',
                         href='',
                         public_url='http://spotify.com/artist/12',
-                    ),
-                ]
+                    )
+                ],
+                tracks=[
+                    Track(
+                        id_='1',
+                        name='Peligro',
+                        href='',
+                        public_url='http://spotify.com/track/1',
+                        disc_number=1,
+                        track_number=1,
+                        duration=1000,
+                    )
+                ],
             )
         )
 
@@ -132,28 +140,32 @@ class TestGorrion:
                     '#gorrion #NowPlaying #ElyGuerra\n\n'
                     'http://spotify.com/track/1'
                 ),
-                entity=Track(
-                    id_='1',
-                    name='Peligro',
+                entity=Album(
+                    id_='11',
+                    name='Pa morirse de amor',
                     href='',
-                    public_url='http://spotify.com/track/1',
-                    track_number=1,
-                    album=Album(
-                        id_='11',
-                        name='Pa morirse de amor',
-                        href='',
-                        public_url='http://spotify.com/album/11',
-                        release_date='2006-01-01',
-                        total_tracks=19,
-                    ),
+                    public_url='http://spotify.com/album/11',
+                    release_date='2006-01-01',
+                    total_tracks=19,
                     artists=[
                         Artist(
                             id_='12',
                             name='Ely Guerra',
                             href='',
                             public_url='http://spotify.com/artist/12',
-                        ),
-                    ]
+                        )
+                    ],
+                    tracks=[
+                        Track(
+                            id_='1',
+                            name='Peligro',
+                            href='',
+                            public_url='http://spotify.com/track/1',
+                            disc_number=1,
+                            track_number=1,
+                            duration=1000,
+                        )
+                    ],
                 )
             ),
             PublishedTweet(id_='fake-status-id', tweet='lyric1', entity=None),
@@ -182,61 +194,69 @@ class TestGorrion:
                 '#gorrion #NowPlaying #PaMorirseDeAmor #ElyGuerra\n\n'
                 'http://spotify.com/album/11?si=g'
             ),
-            entity=Track(
-                id_='1',
-                name='Peligro',
-                href='',
-                public_url='http://spotify.com/track/1',
-                track_number=1,
-                album=Album(
-                    id_='11',
-                    name='Pa morirse de amor',
-                    href='',
-                    public_url='http://spotify.com/album/11',
-                    release_date='2006-01-01',
-                    total_tracks=19,
-                ),
-                artists=[
-                    Artist(
-                        id_='12',
-                        name='Ely Guerra',
-                        href='',
-                        public_url='http://spotify.com/artist/12',
-                    ),
-                ]
-            )
-        )
-
-    def test_get_playing_track(self, twitter, track):
-        spotify_mock = MagicMock()
-        spotify_mock.get_current_track.return_value = track
-
-        gorrion = Gorrion(spotify_mock, twitter, MagicMock())
-
-        current_track = gorrion.get_playing_track()
-
-        assert current_track == Track(
-            id_='1',
-            name='Peligro',
-            href='',
-            public_url='http://spotify.com/track/1',
-            track_number=1,
-            album=Album(
+            entity=Album(
                 id_='11',
                 name='Pa morirse de amor',
                 href='',
                 public_url='http://spotify.com/album/11',
                 release_date='2006-01-01',
                 total_tracks=19,
-            ),
+                artists=[
+                    Artist(
+                        id_='12',
+                        name='Ely Guerra',
+                        href='',
+                        public_url='http://spotify.com/artist/12',
+                    )
+                ],
+                tracks=[
+                    Track(
+                        id_='1',
+                        name='Peligro',
+                        href='',
+                        public_url='http://spotify.com/track/1',
+                        disc_number=1,
+                        track_number=1,
+                        duration=1000,
+                    )
+                ],
+            )
+        )
+
+    def test_get_playing_album(self, twitter, track):
+        spotify_mock = MagicMock()
+        spotify_mock.get_current_track.return_value = track
+
+        gorrion = Gorrion(spotify_mock, twitter, MagicMock())
+
+        current_album = gorrion.get_playing_album()
+
+        assert current_album == Album(
+            id_='11',
+            name='Pa morirse de amor',
+            href='',
+            public_url='http://spotify.com/album/11',
+            release_date='2006-01-01',
+            total_tracks=19,
             artists=[
                 Artist(
                     id_='12',
                     name='Ely Guerra',
                     href='',
                     public_url='http://spotify.com/artist/12',
-                ),
-            ]
+                )
+            ],
+            tracks=[
+                Track(
+                    id_='1',
+                    name='Peligro',
+                    href='',
+                    public_url='http://spotify.com/track/1',
+                    disc_number=1,
+                    track_number=1,
+                    duration=1000,
+                )
+            ],
         )
 
     def test_get_lyric(self, twitter, track, song, lyric):
@@ -278,28 +298,32 @@ class TestGorrion:
                 '#gorrion #NowPlaying #ElyGuerra\n\n'
                 'http://spotify.com/track/1'
             ),
-            entity=Track(
-                id_='1',
-                name='Peligro',
+            entity=Album(
+                id_='11',
+                name='Pa morirse de amor',
                 href='',
-                public_url='http://spotify.com/track/1',
-                track_number=1,
-                album=Album(
-                    id_='11',
-                    name='Pa morirse de amor',
-                    href='',
-                    public_url='http://spotify.com/album/11',
-                    release_date='2006-01-01',
-                    total_tracks=19,
-                ),
+                public_url='http://spotify.com/album/11',
+                release_date='2006-01-01',
+                total_tracks=19,
                 artists=[
                     Artist(
                         id_='12',
                         name='Ely Guerra',
                         href='',
                         public_url='http://spotify.com/artist/12',
-                    ),
-                ]
+                    )
+                ],
+                tracks=[
+                    Track(
+                        id_='1',
+                        name='Peligro',
+                        href='',
+                        public_url='http://spotify.com/track/1',
+                        disc_number=1,
+                        track_number=1,
+                        duration=1000,
+                    )
+                ],
             )
         )
 
@@ -339,28 +363,32 @@ class TestGorrion:
                 '#gorrion #NowPlaying #PaMorirseDeAmor #ElyGuerra\n\n'
                 'http://spotify.com/album/11?si=g'
             ),
-            entity=Track(
-                id_='1',
-                name='Peligro',
+            entity=Album(
+                id_='11',
+                name='Pa morirse de amor',
                 href='',
-                public_url='http://spotify.com/track/1',
-                track_number=1,
-                album=Album(
-                    id_='11',
-                    name='Pa morirse de amor',
-                    href='',
-                    public_url='http://spotify.com/album/11',
-                    release_date='2006-01-01',
-                    total_tracks=19,
-                ),
+                public_url='http://spotify.com/album/11',
+                release_date='2006-01-01',
+                total_tracks=19,
                 artists=[
                     Artist(
                         id_='12',
                         name='Ely Guerra',
                         href='',
                         public_url='http://spotify.com/artist/12',
-                    ),
-                ]
+                    )
+                ],
+                tracks=[
+                    Track(
+                        id_='1',
+                        name='Peligro',
+                        href='',
+                        public_url='http://spotify.com/track/1',
+                        disc_number=1,
+                        track_number=1,
+                        duration=1000,
+                    )
+                ],
             )
         )
 
