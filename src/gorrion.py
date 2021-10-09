@@ -30,10 +30,9 @@ class Gorrion:
         self._musixmatch = musixmatch
 
     def playing(self) -> PublishedTweet:
-        current_album = self.get_playing_album()
-        tweet = self.publish_track(current_album)
+        current_album = self._spotify.get_current_track()
 
-        return tweet
+        return self.publish_track(current_album)
 
     def playing_with_lyrics(self) -> list:
         current_album_tweet = self.playing()
@@ -44,10 +43,9 @@ class Gorrion:
         return [current_album_tweet, *lyrics_tweets]
 
     def playing_album(self) -> PublishedTweet:
-        current_album = self.get_playing_album()
-        tweet = self.publish_album(current_album)
+        current_album = self._spotify.get_current_track()
 
-        return tweet
+        return self.publish_album(current_album)
 
     def playing_album_with_tracks(self) -> list:
         album = self._spotify.get_current_album()
@@ -55,10 +53,6 @@ class Gorrion:
         tracks = self.publish_tracks(album_tweet)
 
         return [album_tweet, *tracks]
-
-    def get_playing_album(self) -> Album:
-        current_album = self._spotify.get_current_track()
-        return current_album
 
     def get_lyric(self, album: Album) -> Song:
         song = Song(
@@ -82,9 +76,7 @@ class Gorrion:
 
         return tweeted_track
 
-    def publish_lyrics(self,
-                       tweeted_track: PublishedTweet,
-                       song: Song) -> list:
+    def publish_lyrics(self, tweeted_track: PublishedTweet, song: Song) -> list:
         if not song.lyric:
             return []
 

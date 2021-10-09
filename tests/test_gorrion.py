@@ -219,7 +219,7 @@ class TestGorrion:
             )
         )
 
-    def test_get_playing_album_with_tracks(self, twitter, album):
+    def test_playing_album_with_tracks(self, twitter, album):
         spotify_mock = MagicMock()
         spotify_mock.get_current_album.return_value = album
 
@@ -273,42 +273,6 @@ class TestGorrion:
                 entity=None
             ),
         ]
-
-    def test_get_playing_album(self, twitter, album):
-        spotify_mock = MagicMock()
-        spotify_mock.get_current_track.return_value = album
-
-        gorrion = Gorrion(spotify_mock, twitter, MagicMock())
-
-        current_album = gorrion.get_playing_album()
-
-        assert current_album == Album(
-            id_='11',
-            name='Pa morirse de amor',
-            href='',
-            public_url='http://spotify.com/album/11',
-            release_date='2006-01-01',
-            total_tracks=19,
-            artists=[
-                Artist(
-                    id_='12',
-                    name='Ely Guerra',
-                    href='',
-                    public_url='http://spotify.com/artist/12',
-                )
-            ],
-            tracks=[
-                Track(
-                    id_='1',
-                    name='Peligro',
-                    href='',
-                    public_url='http://spotify.com/track/1',
-                    disc_number=1,
-                    track_number=1,
-                    duration=1000,
-                )
-            ],
-        )
 
     def test_get_lyric(self, twitter, album, song, lyric):
         musixmatch_mock = MagicMock()
