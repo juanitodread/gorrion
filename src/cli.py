@@ -1,4 +1,5 @@
 import argparse
+from argparse import Namespace
 
 from src.config import Config
 from src.clients.spotify import Spotify, SpotifyApiError
@@ -49,6 +50,23 @@ class CLI:
         except SpotifyApiError as error:
             print(error)
 
+    def playing_album_with_tracks(self, local_mode: bool) -> None:
+        try:
+            gorrion = self._build_gorrion(local_mode, False)
+
+            tweets = gorrion.playing_album_with_tracks()
+            album, *tracks = tweets
+
+            print(self._get_album_header())
+            print(album.tweet)
+
+            if tracks:
+                tracks_tweets = '\n'.join([track.tweet for track in tracks])
+                print(self._get_track_header())
+                print(tracks_tweets)
+        except SpotifyApiError as error:
+            print(error)
+
     def _build_gorrion(self, local_mode: bool, delay_mode: bool) -> Gorrion:
         spotify = Spotify(Config.get_spotify_config())
         musixmatch = Musixmatch(Config.get_musixmatch_config())
@@ -68,7 +86,10 @@ class CLI:
     def _get_album_header(self) -> str:
         return '[---------------------- Album ----------------------]'
 
-    def _parse_args(self) -> None:
+    def _get_track_header(self) -> str:
+        return '[---------------------- Tracks ---------------------]'
+
+    def _parse_args(self) -> Namespace:
         parser = argparse.ArgumentParser(description='Gorrion app')
 
         parser.add_argument(
@@ -113,4 +134,7 @@ if __name__ == "__main__":
         quit()
     if command == 'album':
         cli.playing_album(local_mode)
+        quit()
+    if command == 'album-tracks':
+        cli.playing_album_with_tracks(local_mode)
         quit()
