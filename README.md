@@ -9,6 +9,7 @@ You can publish the following information based on your current Spotify's playin
   * Song
   * Song with lyrics (If lyric available)
   * Album
+  * Tracks (Album + List of tracks)
   
 There are two flavors to publish to Twitter:
   * CLI
