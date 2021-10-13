@@ -36,7 +36,7 @@ class TestTelegramBot:
                 '/playing\n'
                 '/lyric\n'
                 '/album\n'
-                '/album-tracks\n'
+                '/tracks\n'
                 '/about'
             )
         )
@@ -64,7 +64,7 @@ class TestTelegramBot:
                 '/playing\n'
                 '/lyric\n'
                 '/album\n'
-                '/album-tracks\n'
+                '/tracks\n'
                 '/about'
             )
         )
@@ -190,7 +190,7 @@ class TestTelegramBot:
     def test_process_playing_album_with_tracks_command(self, gorrion_mock, bot_mock, update_mock):
         tweet = PublishedTweet(id_='1', tweet='tweet1', entity=None)
         update = MagicMock()
-        update.message.text = '/album-tracks'
+        update.message.text = '/tracks'
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
         gorrion_mock.return_value.playing_album_with_tracks.return_value = [
@@ -215,7 +215,7 @@ class TestTelegramBot:
     @patch('src.telegram_bot.Gorrion')
     def test_process_playing_album_with_tracks_command_with_error(self, gorrion_mock, bot_mock, update_mock):
         update = MagicMock()
-        update.message.text = '/album-tracks'
+        update.message.text = '/tracks'
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
         gorrion_mock.return_value.playing_album_with_tracks.side_effect = SpotifyApiError('error')

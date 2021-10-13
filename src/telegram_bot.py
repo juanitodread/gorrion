@@ -39,7 +39,7 @@ class TelegramBot:
             if text == '/album':
                 self.playing_album(chat_id, gorrion)
                 return
-            if text == '/album-tracks':
+            if text == '/tracks':
                 self.playing_album_with_tracks(chat_id, gorrion)
                 return
         except SpotifyApiError as error:
@@ -136,7 +136,7 @@ class TelegramBot:
         return Gorrion(spotify, twitter, musixmatch)
 
     def _get_commands(self) -> list:
-        return ['/start', '/playing', '/lyric', '/album', '/album-tracks', '/about']
+        return ['/start', '/playing', '/lyric', '/album', '/tracks', '/about']
 
 
 def do_work(event, context) -> dict:
