@@ -9,7 +9,7 @@ from src.gorrion import Gorrion
 
 
 class CLI:
-    COMMANDS = ('playing', 'lyric', 'album', 'album-tracks')
+    COMMANDS = ('playing', 'lyric', 'album', 'tracks')
 
     def playing(self, local_mode: bool) -> None:
         try:
@@ -135,6 +135,6 @@ if __name__ == "__main__":
     if command == 'album':
         cli.playing_album(local_mode)
         quit()
-    if command == 'album-tracks':
+    if command == 'tracks':
         cli.playing_album_with_tracks(local_mode)
         quit()
