@@ -39,6 +39,9 @@ class TelegramBot:
             if text == '/album':
                 self.playing_album(chat_id, gorrion)
                 return
+            if text == '/album-tracks':
+                self.playing_album_with_tracks(chat_id, gorrion)
+                return
         except SpotifyApiError as error:
             self._bot.send_message(
                 chat_id=chat_id,
@@ -72,6 +75,7 @@ class TelegramBot:
             chat_id=chat_id,
             text=song.tweet
         )
+
         if lyrics:
             for lyric in lyrics:
                 self._bot.send_message(
@@ -86,6 +90,22 @@ class TelegramBot:
             chat_id=chat_id,
             text=song.tweet
         )
+
+    def playing_album_with_tracks(self, chat_id: str, gorrion: Gorrion) -> None:
+        tweets = gorrion.playing_album_with_tracks()
+        album, *tracks = tweets
+
+        self._bot.send_message(
+            chat_id=chat_id,
+            text=album.tweet
+        )
+
+        if tracks:
+            for track in tracks:
+                self._bot.send_message(
+                    chat_id=chat_id,
+                    text=track.tweet
+                )
 
     def about(self, chat_id: str) -> None:
         self._bot.send_message(
@@ -116,7 +136,7 @@ class TelegramBot:
         return Gorrion(spotify, twitter, musixmatch)
 
     def _get_commands(self) -> list:
-        return ['/start', '/playing', '/lyric', '/album', '/about']
+        return ['/start', '/playing', '/lyric', '/album', '/album-tracks', '/about']
 
 
 def do_work(event, context) -> dict:

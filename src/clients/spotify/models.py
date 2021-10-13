@@ -10,18 +10,20 @@ class Entity:
 
 
 @dataclass
-class Album(Entity):
-    release_date: str
-    total_tracks: int
-
-
-@dataclass
 class Artist(Entity):
     pass
 
 
 @dataclass
 class Track(Entity):
+    disc_number: int
     track_number: int
-    album: Album
+    duration: int
+
+
+@dataclass
+class Album(Entity):
+    release_date: str
+    total_tracks: int
     artists: list
+    tracks: list

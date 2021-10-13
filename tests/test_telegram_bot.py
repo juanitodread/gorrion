@@ -36,6 +36,7 @@ class TestTelegramBot:
                 '/playing\n'
                 '/lyric\n'
                 '/album\n'
+                '/album-tracks\n'
                 '/about'
             )
         )
@@ -63,6 +64,7 @@ class TestTelegramBot:
                 '/playing\n'
                 '/lyric\n'
                 '/album\n'
+                '/album-tracks\n'
                 '/about'
             )
         )
@@ -70,10 +72,7 @@ class TestTelegramBot:
     @patch('src.telegram_bot.Update')
     @patch('src.telegram_bot.Bot')
     @patch('src.telegram_bot.Gorrion')
-    def test_process_playing_command(self,
-                                     gorrion_mock,
-                                     bot_mock,
-                                     update_mock):
+    def test_process_playing_command(self, gorrion_mock, bot_mock, update_mock):
         update = MagicMock()
         update.message.text = '/playing'
         update.message.chat.id = '123'
@@ -91,10 +90,7 @@ class TestTelegramBot:
     @patch('src.telegram_bot.Update')
     @patch('src.telegram_bot.Bot')
     @patch('src.telegram_bot.Gorrion')
-    def test_process_playing_command_when_error(self,
-                                                gorrion_mock,
-                                                bot_mock,
-                                                update_mock):
+    def test_process_playing_command_when_error(self, gorrion_mock, bot_mock, update_mock):
         update = MagicMock()
         update.message.text = '/playing'
         update.message.chat.id = '123'
@@ -112,19 +108,14 @@ class TestTelegramBot:
     @patch('src.telegram_bot.Update')
     @patch('src.telegram_bot.Bot')
     @patch('src.telegram_bot.Gorrion')
-    def test_process_playing_with_lyrics_command(self,
-                                                 gorrion_mock,
-                                                 bot_mock,
-                                                 update_mock):
-        tweet = PublishedTweet(id_='1', tweet='tweet1', entity=None)
-        lyric = PublishedTweet(id_='2', tweet='lyric1', entity=None)
+    def test_process_playing_with_lyrics_command(self, gorrion_mock, bot_mock, update_mock):
         update = MagicMock()
         update.message.text = '/lyric'
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
         gorrion_mock.return_value.playing_with_lyrics.return_value = [
-            tweet,
-            lyric,
+            PublishedTweet(id_='1', tweet='tweet1', entity=None),
+            PublishedTweet(id_='2', tweet='lyric1', entity=None),
         ]
 
         telegram_bot = TelegramBot()
@@ -142,10 +133,7 @@ class TestTelegramBot:
     @patch('src.telegram_bot.Update')
     @patch('src.telegram_bot.Bot')
     @patch('src.telegram_bot.Gorrion')
-    def test_process_playing_with_lyrics_command_when_error(self,
-                                                            gorrion_mock,
-                                                            bot_mock,
-                                                            update_mock):
+    def test_process_playing_with_lyrics_command_when_error(self, gorrion_mock, bot_mock, update_mock):
         update = MagicMock()
         update.message.text = '/lyric'
         update.message.chat.id = '123'
@@ -163,16 +151,12 @@ class TestTelegramBot:
     @patch('src.telegram_bot.Update')
     @patch('src.telegram_bot.Bot')
     @patch('src.telegram_bot.Gorrion')
-    def test_process_playing_album_command(self,
-                                           gorrion_mock,
-                                           bot_mock,
-                                           update_mock):
-        tweet = PublishedTweet(id_='1', tweet='tweet1', entity=None)
+    def test_process_playing_album_command(self, gorrion_mock, bot_mock, update_mock):
         update = MagicMock()
         update.message.text = '/album'
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
-        gorrion_mock.return_value.playing_album.return_value = tweet
+        gorrion_mock.return_value.playing_album.return_value = PublishedTweet(id_='1', tweet='tweet1', entity=None)
 
         telegram_bot = TelegramBot()
         telegram_bot.process_event({})
@@ -185,15 +169,56 @@ class TestTelegramBot:
     @patch('src.telegram_bot.Update')
     @patch('src.telegram_bot.Bot')
     @patch('src.telegram_bot.Gorrion')
-    def test_process_playing_album_command_with_error(self,
-                                                      gorrion_mock,
-                                                      bot_mock,
-                                                      update_mock):
+    def test_process_playing_album_command_with_error(self, gorrion_mock, bot_mock, update_mock):
         update = MagicMock()
         update.message.text = '/album'
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
         gorrion_mock.return_value.playing_album.side_effect = SpotifyApiError('error')
+
+        telegram_bot = TelegramBot()
+        telegram_bot.process_event({})
+
+        bot_mock.return_value.send_message.assert_any_call(
+            chat_id='123',
+            text='error'
+        )
+
+    @patch('src.telegram_bot.Update')
+    @patch('src.telegram_bot.Bot')
+    @patch('src.telegram_bot.Gorrion')
+    def test_process_playing_album_with_tracks_command(self, gorrion_mock, bot_mock, update_mock):
+        tweet = PublishedTweet(id_='1', tweet='tweet1', entity=None)
+        update = MagicMock()
+        update.message.text = '/album-tracks'
+        update.message.chat.id = '123'
+        update_mock.de_json.return_value = update
+        gorrion_mock.return_value.playing_album_with_tracks.return_value = [
+            PublishedTweet(id_='1', tweet='album-tweet', entity=None),
+            PublishedTweet(id_='2', tweet='tracks-tweet', entity=None),
+        ]
+
+        telegram_bot = TelegramBot()
+        telegram_bot.process_event({})
+
+        bot_mock.return_value.send_message.assert_any_call(
+            chat_id='123',
+            text='album-tweet'
+        )
+        bot_mock.return_value.send_message.assert_any_call(
+            chat_id='123',
+            text='tracks-tweet'
+        )
+
+    @patch('src.telegram_bot.Update')
+    @patch('src.telegram_bot.Bot')
+    @patch('src.telegram_bot.Gorrion')
+    def test_process_playing_album_with_tracks_command_with_error(self, gorrion_mock, bot_mock, update_mock):
+        update = MagicMock()
+        update.message.text = '/album-tracks'
+        update.message.chat.id = '123'
+        update_mock.de_json.return_value = update
+        gorrion_mock.return_value.playing_album_with_tracks.side_effect = SpotifyApiError('error')
 
         telegram_bot = TelegramBot()
         telegram_bot.process_event({})
