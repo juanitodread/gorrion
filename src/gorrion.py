@@ -123,7 +123,10 @@ class Gorrion:
         return tweet_status
 
     def is_valid_tweet_status(self, status: str) -> bool:
-        return len(status) <= self._twitter.max_tweet_length
+        # Tracks command injects clock emoji ⏳ which counts as two characters for Twitter. We need to add one more
+        # character for each ⏳.
+        extra_chars = ' ' * status.count('⏳')
+        return len(status + extra_chars) <= self._twitter.max_tweet_length
 
     def lyrics_to_tweets(self, lyrics: list) -> list:
         lyric_tweets = []

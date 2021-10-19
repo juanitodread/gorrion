@@ -188,7 +188,6 @@ class TestTelegramBot:
     @patch('src.telegram_bot.Bot')
     @patch('src.telegram_bot.Gorrion')
     def test_process_playing_album_with_tracks_command(self, gorrion_mock, bot_mock, update_mock):
-        tweet = PublishedTweet(id_='1', tweet='tweet1', entity=None)
         update = MagicMock()
         update.message.text = '/tracks'
         update.message.chat.id = '123'
