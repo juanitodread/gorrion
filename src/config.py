@@ -20,6 +20,7 @@ class Config:
     MUSIXMATCH_API_KEY = os.getenv('MUSIXMATCH_API_KEY')
 
     TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+    TELEGRAM_OWNER_USERNAME = os.getenv('TELEGRAM_OWNER_USERNAME')
 
     @staticmethod
     def get_spotify_config() -> SpotifyConfig:

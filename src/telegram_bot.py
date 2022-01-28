@@ -17,16 +17,7 @@ class TelegramBot:
         chat_id = update.message.chat.id
         text = update.message.text.encode('utf-8').decode()
 
-        if text not in self._get_commands():
-            self.invalid_command(chat_id)
-            return
-
-        if text == '/start':
-            self.start(chat_id)
-            return
-        if text == '/about':
-            self.about(chat_id)
-            return
+        self._check_event(event, chat_id, text)
 
         try:
             gorrion = self._build_gorrion(False, False)
@@ -124,6 +115,12 @@ class TelegramBot:
             text=f'Supported commands are: \n\n{commands}'
         )
 
+    def invalid_sender(self, chat_id: str) -> None:
+        self._bot.send_message(
+            chat_id=chat_id,
+            text='Sorry 💔. I can only chat with my creator 🧙🏼.'
+        )
+
     def _build_gorrion(self, local_mode: bool, delay_mode: bool) -> Gorrion:
         spotify = Spotify(Config.get_spotify_config())
         musixmatch = Musixmatch(Config.get_musixmatch_config())
@@ -135,8 +132,31 @@ class TelegramBot:
 
         return Gorrion(spotify, twitter, musixmatch)
 
+    def _check_event(self, event: dict, chat_id: str, text: str) -> None:
+        if not self._is_telegram_owner_sending(event):
+            self.invalid_sender(chat_id)
+            return
+
+        if text not in self._get_commands():
+            self.invalid_command(chat_id)
+            return
+
+        if text == '/start':
+            self.start(chat_id)
+            return
+
+        if text == '/about':
+            self.about(chat_id)
+            return
+
     def _get_commands(self) -> list:
         return ['/start', '/playing', '/lyric', '/album', '/tracks', '/about']
+
+    def _is_telegram_owner_sending(self, event: dict) -> bool:
+        if not Config.TELEGRAM_OWNER_USERNAME:
+            raise Exception('TELEGRAM_OWNER_USERNAME variable is wrong')
+
+        return Config.TELEGRAM_OWNER_USERNAME == event.get('message', {}).get('from', {}).get('username', '')
 
 
 def do_work(event, context) -> dict:
