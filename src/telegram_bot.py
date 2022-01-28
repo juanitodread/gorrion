@@ -17,7 +17,8 @@ class TelegramBot:
         chat_id = update.message.chat.id
         text = update.message.text.encode('utf-8').decode()
 
-        self._check_event(event, chat_id, text)
+        if not self._is_event_valid(event, chat_id, text):
+            return
 
         try:
             gorrion = self._build_gorrion(False, False)
@@ -132,22 +133,24 @@ class TelegramBot:
 
         return Gorrion(spotify, twitter, musixmatch)
 
-    def _check_event(self, event: dict, chat_id: str, text: str) -> None:
+    def _is_event_valid(self, event: dict, chat_id: str, text: str) -> None:
         if not self._is_telegram_owner_sending(event):
             self.invalid_sender(chat_id)
-            return
+            return False
 
         if text not in self._get_commands():
             self.invalid_command(chat_id)
-            return
+            return False
 
         if text == '/start':
             self.start(chat_id)
-            return
+            return False
 
         if text == '/about':
             self.about(chat_id)
-            return
+            return False
+
+        return True
 
     def _get_commands(self) -> list:
         return ['/start', '/playing', '/lyric', '/album', '/tracks', '/about']

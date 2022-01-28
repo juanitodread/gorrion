@@ -65,6 +65,7 @@ class TestTelegramBot:
             telegram_bot.process_event(event)
 
         assert str(error.value) == 'TELEGRAM_OWNER_USERNAME variable is wrong'
+        bot_mock.return_value.send_message.assert_not_called()
 
     @patch('src.telegram_bot.Update')
     @patch('src.telegram_bot.Bot')
