@@ -133,7 +133,7 @@ class TelegramBot:
 
         return Gorrion(spotify, twitter, musixmatch)
 
-    def _is_event_valid(self, event: dict, chat_id: str, text: str) -> None:
+    def _is_event_valid(self, event: dict, chat_id: str, text: str) -> bool:
         if not self._is_telegram_owner_sending(event):
             self.invalid_sender(chat_id)
             return False

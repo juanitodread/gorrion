@@ -7,11 +7,11 @@ from src.clients.twitter.models import PublishedTweet
 
 
 @pytest.fixture()
-@patch('src.clients.twitter.client.API')
-def twitter(API_mock) -> Twitter:
+@patch('src.clients.twitter.client.tweepy.Client')
+def twitter(tweepy_client_mock) -> Twitter:
     status = MagicMock()
-    status.id = '123456'
-    API_mock.return_value.update_status = MagicMock(return_value=status)
+    status.data = {'id': '123456'}
+    tweepy_client_mock.return_value.create_tweet = MagicMock(return_value=status)
 
     return Twitter(TwitterConfig(
         'consumer-key',
