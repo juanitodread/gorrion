@@ -23,6 +23,9 @@ class Twitter:
             access_token_secret=self._access_token_secret
         )
 
+        print('Twitter Client v2 created')
+
+
     def post(self, tweet: str) -> PublishedTweet:
         status = self._client.create_tweet(text=tweet)
 
