@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python 3.9.15
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9.15
 
@@ -24,7 +24,7 @@ jobs:
         zip -r gorrion-telegram-bot.zip .
 
     - name: Deploy to AWS
-      uses: appleboy/lambda-action@master
+      uses: appleboy/lambda-action@v0.1.9
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
