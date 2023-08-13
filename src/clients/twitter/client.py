@@ -1,6 +1,6 @@
 import time
 
-from tweepy import OAuthHandler, API
+import tweepy
 
 from src.clients.twitter.config import TwitterConfig
 from src.clients.twitter.models import PublishedTweet
@@ -16,26 +16,28 @@ class Twitter:
         self._retweet_delay = config.retweet_delay
         self._retweet_delay_secs = config.retweet_delay_secs
 
-        auth = OAuthHandler(self._consumer_key, self._consumer_secret)
-        auth.set_access_token(self._access_token, self._access_token_secret)
-
-        self._client = API(auth)
+        self._client = tweepy.Client(
+            consumer_key=self._consumer_key,
+            consumer_secret=self._consumer_secret,
+            access_token=self._access_token,
+            access_token_secret=self._access_token_secret
+        )
 
     def post(self, tweet: str) -> PublishedTweet:
-        status = self._client.update_status(tweet)
+        status = self._client.create_tweet(text=tweet)
 
-        return PublishedTweet(status.id, tweet, None)
+        return PublishedTweet(status.data['id'], tweet, None)
 
     def reply(self, tweet: str, tweet_id: int) -> PublishedTweet:
         if self._retweet_delay:
             time.sleep(self._retweet_delay_secs)
 
-        status = self._client.update_status(
-            tweet,
-            in_reply_to_status_id=tweet_id
+        status = self._client.create_tweet(
+            text=tweet,
+            in_reply_to_tweet_id=tweet_id
         )
 
-        return PublishedTweet(status.id, tweet, None)
+        return PublishedTweet(status.data['id'], tweet, None)
 
     @property
     def max_tweet_length(self) -> int:
