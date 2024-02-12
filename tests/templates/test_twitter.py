@@ -77,7 +77,7 @@ class TestTweetTemplate:
         song_config_fixture.with_footer = True
         template = TweetTemplate(album_fixture, song_config_fixture)
 
-        assert template.to_tweet() == ('#gorrion #NowPlaying\n\n'
+        assert template.to_tweet() == ('#gorrion #NowPlaying #ElyGuerra\n\n'
                                        'http://spotify.com/track/1')
 
     def test_to_tweet_default_config(self, album_fixture, config_fixture):
@@ -115,7 +115,7 @@ class TestTweetTemplate:
         song_config_fixture.with_footer = True
         template = TweetTemplate(album_fixture, song_config_fixture)
 
-        assert template.footer() == ('#gorrion #NowPlaying\n\n'
+        assert template.footer() == ('#gorrion #NowPlaying #ElyGuerra\n\n'
                                      'http://spotify.com/track/1')
 
     def test_footer_with_footer_false(self, album_fixture, song_config_fixture):
