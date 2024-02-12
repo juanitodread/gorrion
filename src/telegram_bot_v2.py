@@ -146,7 +146,7 @@ async def _do_work_lambda(event, context) -> dict:
 
     try:
         await app.initialize()
-        await app.process_update(Update.de_json(json.loads(event['body']), app.bot))
+        await app.process_update(Update.de_json(event, app.bot))
     except Exception as error:
         print(f'Error: {error}')
     
