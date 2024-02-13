@@ -23,6 +23,15 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt -t .; fi
         zip -r gorrion-telegram-bot.zip .
 
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --show-source --statistics
+
+    - name: Test with pytest
+      run: |
+        pytest -vv
+
     - name: Deploy to AWS
       uses: appleboy/lambda-action@v0.1.9
       with:
