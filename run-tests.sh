@@ -1,4 +1,4 @@
 #!/bin/bash
 
-flake8
-pytest -vv
+flake8 || exit
+pytest -vv || exit

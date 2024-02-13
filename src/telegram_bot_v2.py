@@ -1,12 +1,11 @@
-import json
 import asyncio
 from telegram import Update
 from telegram.ext import (
-    ApplicationBuilder, 
-    Application, 
-    ContextTypes, 
-    CommandHandler, 
-    MessageHandler, 
+    ApplicationBuilder,
+    Application,
+    ContextTypes,
+    CommandHandler,
+    MessageHandler,
     filters,
 )
 
@@ -26,8 +25,7 @@ def _new_gorrion(local_mode: bool, delay_mode: bool) -> Gorrion:
 
     twitter_config = Config.get_twitter_config()
     twitter_config.retweet_delay = delay_mode
-    twitter = (TwitterLocal(twitter_config)
-                if local_mode else Twitter(twitter_config))
+    twitter = (TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config))
 
     return Gorrion(spotify, twitter, musixmatch)
 
@@ -40,7 +38,7 @@ class TelegramBot:
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await self._send_message(update, context, 'Welcome to Gorrion Bot 🐦🤖')
         await self._send_message(update, context, f'Supported commands are: \n\n{"\n".join(self._commands)}')
-    
+
     async def playing(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         song = self._gorrion.playing()
 
@@ -75,12 +73,13 @@ class TelegramBot:
         await self._send_message(update, context, 'Made with ❤️ by @juanitodread')
 
     async def any_other_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await self._send_message(update, context, f'I can only reply to you based on the commands: \n\n{"\n".join(self._commands)}')
+        commands = '\n'.join(self._commands)
+        await self._send_message(update, context, f'I can only reply to you based on the commands: \n\n{commands}')
 
     async def _send_message(self, update: Update | object, context: ContextTypes.DEFAULT_TYPE, message: str) -> None:
         if not self._is_bot_owner(update.effective_chat.username):
             await context.bot.send_message(
-                chat_id=update.effective_chat.id, 
+                chat_id=update.effective_chat.id,
                 text='Sorry 💔. I can only chat with my creator 🧙🏼.'
             )
             return
@@ -101,7 +100,7 @@ class TelegramBot:
             raise Exception('TELEGRAM_OWNER_USERNAME variable is wrong')
 
         return Config.TELEGRAM_OWNER_USERNAME == username
-    
+
 
 def _setup_app(app: Application, bot: TelegramBot) -> Application:
     start_handler = CommandHandler('start', bot.start)
@@ -129,7 +128,7 @@ def _setup_app(app: Application, bot: TelegramBot) -> Application:
 
     return app
 
-    
+
 def _do_work_local(event, context) -> None:
     gorrion = _new_gorrion(local_mode=True, delay_mode=False)
     bot = TelegramBot(gorrion)
@@ -149,7 +148,7 @@ async def _do_work_lambda(event, context) -> dict:
         await app.process_update(Update.de_json(event, app.bot))
     except Exception as error:
         print(f'Error: {error}')
-    
+
     return {
         'status_code': 200,
         'body': {}
@@ -158,9 +157,9 @@ async def _do_work_lambda(event, context) -> dict:
 
 def do_work(event, context):
     print(f'Event: {event}')
-        
+
     # run in lambda
     return asyncio.get_event_loop().run_until_complete(_do_work_lambda(event, context))
 
     # run in local
-    # _do_work_local(event, context) 
+    # _do_work_local(event, context)
