@@ -1,6 +1,6 @@
 flake8==7.0.0
 pytest==8.0.0
 python-telegram-bot==20.7
-requests==2.31.0
+requests==2.32.2
 tweepy==4.14.0
 tweet-counter==0.1.0
