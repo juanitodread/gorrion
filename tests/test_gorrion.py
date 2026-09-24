@@ -164,8 +164,6 @@ class TestGorrion:
                     ],
                 )
             ),
-            PublishedTweet(id_='fake-status-id', tweet='lyric1', entity=None),
-            PublishedTweet(id_='fake-status-id', tweet='lyric2', entity=None),
         ]
 
     def test_playing_album(self, twitter, album, song, lyric):
@@ -290,12 +288,7 @@ class TestGorrion:
             album='Pa morirse de amor',
             tracks=None,
             tracks_length=0,
-            lyric=Lyric(
-                id_='123',
-                track_id='456',
-                common_track_id='789',
-                content=['lyric1', 'lyric2']
-            )
+            lyric=None
         )
 
     def test_publish_track(self, twitter, album):

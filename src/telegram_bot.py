@@ -25,9 +25,6 @@ class TelegramBot:
             if text == '/playing':
                 self.playing(chat_id, gorrion)
                 return
-            if text == '/lyric':
-                self.playing_with_lyrics(chat_id, gorrion)
-                return
             if text == '/album':
                 self.playing_album(chat_id, gorrion)
                 return
@@ -58,22 +55,6 @@ class TelegramBot:
             chat_id=chat_id,
             text=song.tweet
         )
-
-    def playing_with_lyrics(self, chat_id: str, gorrion: Gorrion) -> None:
-        tweets = gorrion.playing_with_lyrics()
-        song, *lyrics = tweets
-
-        self._bot.send_message(
-            chat_id=chat_id,
-            text=song.tweet
-        )
-
-        if lyrics:
-            for lyric in lyrics:
-                self._bot.send_message(
-                    chat_id=chat_id,
-                    text=lyric.tweet
-                )
 
     def playing_album(self, chat_id: str, gorrion: Gorrion) -> None:
         song = gorrion.playing_album()
@@ -153,7 +134,7 @@ class TelegramBot:
         return True
 
     def _get_commands(self) -> list:
-        return ['/start', '/playing', '/lyric', '/album', '/tracks', '/about']
+        return ['/start', '/playing', '/album', '/tracks', '/about']
 
     def _is_telegram_owner_sending(self, event: dict) -> bool:
         if not Config.TELEGRAM_OWNER_USERNAME:

@@ -63,6 +63,9 @@ class Gorrion:
             album.name,
         )
 
+        # Musixmatch no longer supports free API calls.
+        return song
+
         try:
             song = self._musixmatch.search_song(song)
             song = self._musixmatch.fetch_lyric(song)
