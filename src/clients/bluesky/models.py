@@ -12,3 +12,4 @@ class PublishedPost(BasePost):
     post: str
     root_cid: str
     root_uri: str
+    entity: object

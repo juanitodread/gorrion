@@ -27,6 +27,7 @@ class Bluesky:
             post=text,
             root_cid=root.cid,
             root_uri=root.uri,
+            entity=None,
         )
 
     def reply(self, text: str, published_post: PublishedPost) -> PublishedPost:
@@ -46,6 +47,7 @@ class Bluesky:
             post=text,
             root_cid=root.cid,
             root_uri=root.uri,
+            entity=published_post.entity,
         )
 
     @property
