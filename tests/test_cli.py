@@ -1,7 +1,10 @@
 from unittest.mock import patch
 
+from atproto import client_utils
+
 from src.cli import CLI
 from src.clients.twitter import PublishedTweet
+from src.clients.bluesky import PublishedPost
 from src.clients.spotify import SpotifyApiError
 
 
@@ -9,7 +12,17 @@ class TestCLI:
     @patch('src.cli.Gorrion')
     @patch('builtins.print')
     def test_playing(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing.return_value = PublishedTweet('123', 'song', None)
+        gorrion_mock.return_value.playing.return_value = [
+            PublishedTweet('123', 'song', None),
+            PublishedPost(
+                cid='cid-123',
+                uri='http://uri-123.com',
+                post=client_utils.TextBuilder().text(text='post'),
+                root_cid='cid-456',
+                root_uri='http://uri',
+                entity=None,
+            ),
+        ]
 
         cli = CLI()
         cli.playing(True)
@@ -29,35 +42,18 @@ class TestCLI:
 
     @patch('src.cli.Gorrion')
     @patch('builtins.print')
-    def test_playing_with_lyrics(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing_with_lyrics.return_value = [
-            PublishedTweet('123', 'song', None),
-            PublishedTweet('456', 'song-lyric1', None),
-            PublishedTweet('789', 'song-lyric2', None),
-        ]
-
-        cli = CLI()
-        cli.playing_with_lyrics(True, False)
-
-        print_mock.assert_any_call('[---------------------- Song -----------------------]')
-        print_mock.assert_any_call('song')
-        print_mock.assert_any_call('[---------------------- Lyric ----------------------]')
-        print_mock.assert_any_call('song-lyric1\n\nsong-lyric2')
-
-    @patch('src.cli.Gorrion')
-    @patch('builtins.print')
-    def test_playing_with_lyrics_when_spotify_error(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing_with_lyrics.side_effect = SpotifyApiError('spotify error')
-
-        cli = CLI()
-        cli.playing_with_lyrics(True, False)
-
-        print_mock.assert_called()
-
-    @patch('src.cli.Gorrion')
-    @patch('builtins.print')
     def test_playing_album(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing_album.return_value = PublishedTweet('123', 'song', None)
+        gorrion_mock.return_value.playing_album.return_value = [
+            PublishedTweet('123', 'song', None),
+            PublishedPost(
+                cid='cid-123',
+                uri='http://uri-123.com',
+                post=client_utils.TextBuilder().text(text='post'),
+                root_cid='cid-456',
+                root_uri='http://uri',
+                entity=None,
+            ),
+        ]
 
         cli = CLI()
         cli.playing_album(True)
@@ -78,10 +74,30 @@ class TestCLI:
     @patch('src.cli.Gorrion')
     @patch('builtins.print')
     def test_playing_album_with_tracks(self, print_mock, gorrion_mock):
-        gorrion_mock.return_value.playing_album_with_tracks.return_value = [
-            PublishedTweet('123', 'album', None),
-            PublishedTweet('123', 'track', None),
-        ]
+        gorrion_mock.return_value.playing_album_with_tracks.return_value = (
+            [
+                PublishedTweet('123', 'album', None),
+                PublishedTweet('123', 'track', None),
+            ],
+            [
+                PublishedPost(
+                    cid='cid-123',
+                    uri='http://uri-123.com',
+                    post=client_utils.TextBuilder().text(text='album'),
+                    root_cid='cid-456',
+                    root_uri='http://uri',
+                    entity=None,
+                ),
+                PublishedPost(
+                    cid='cid-123',
+                    uri='http://uri-123.com',
+                    post='track',
+                    root_cid='cid-456',
+                    root_uri='http://uri',
+                    entity=None,
+                ),
+            ],
+        )
 
         cli = CLI()
         cli.playing_album_with_tracks(True)

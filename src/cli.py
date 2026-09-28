@@ -3,22 +3,26 @@ from argparse import Namespace
 
 from src.config import Config
 from src.clients.spotify import Spotify, SpotifyApiError
-from src.clients.twitter import Twitter, TwitterLocal
+from src.clients.twitter import TwitterFactory
+from src.clients.bluesky import BlueskyFactory
 from src.clients.musixmatch import Musixmatch
 from src.gorrion import Gorrion
 
 
 class CLI:
-    COMMANDS = ('playing', 'lyric', 'album', 'tracks')
+    COMMANDS = ('playing', 'album', 'tracks')
 
     def playing(self, local_mode: bool) -> None:
         try:
             gorrion = self._build_gorrion(local_mode, False)
 
-            song = gorrion.playing()
+            [song, bluesky_song] = gorrion.playing()
 
             print(self._get_song_header())
             print(song.tweet)
+
+            print(self._get_song_header())
+            print(bluesky_song.post.build_text())
         except SpotifyApiError as error:
             print(error)
 
@@ -43,10 +47,13 @@ class CLI:
         try:
             gorrion = self._build_gorrion(local_mode, False)
 
-            song = gorrion.playing_album()
+            [album, bluesky_album] = gorrion.playing_album()
 
             print(self._get_album_header())
-            print(song.tweet)
+            print(album.tweet)
+
+            print(self._get_album_header())
+            print(bluesky_album.post.build_text())
         except SpotifyApiError as error:
             print(error)
 
@@ -54,7 +61,7 @@ class CLI:
         try:
             gorrion = self._build_gorrion(local_mode, False)
 
-            tweets = gorrion.playing_album_with_tracks()
+            [tweets, bluesky] = gorrion.playing_album_with_tracks()
             album, *tracks = tweets
 
             print(self._get_album_header())
@@ -64,6 +71,16 @@ class CLI:
                 tracks_tweets = '\n'.join([track.tweet for track in tracks])
                 print(self._get_track_header())
                 print(tracks_tweets)
+
+            album, *tracks = bluesky
+
+            print(self._get_album_header())
+            print(album.post.build_text())
+
+            tracks_tweets = '\n'.join([track.post for track in tracks])
+            print(self._get_track_header())
+            print(tracks_tweets)
+
         except SpotifyApiError as error:
             print(error)
 
@@ -73,9 +90,15 @@ class CLI:
 
         twitter_config = Config.get_twitter_config()
         twitter_config.retweet_delay = delay_mode
-        twitter = TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config)
+        twitter_config.use_mock = local_mode
+        twitter = TwitterFactory.get_client(twitter_config)
 
-        return Gorrion(spotify, twitter, musixmatch)
+        bluesky_config = Config.get_bluesky_config()
+        bluesky_config.replay_delay = delay_mode
+        bluesky_config.use_mock = local_mode
+        bluesky = BlueskyFactory.get_client(bluesky_config)
+
+        return Gorrion(spotify, twitter, bluesky, musixmatch)
 
     def _get_song_header(self) -> str:
         return '[---------------------- Song -----------------------]'
@@ -128,9 +151,6 @@ if __name__ == "__main__":
         quit()
     if command == 'playing':
         cli.playing(local_mode)
-        quit()
-    if command == 'lyric':
-        cli.playing_with_lyrics(local_mode, delay_mode)
         quit()
     if command == 'album':
         cli.playing_album(local_mode)

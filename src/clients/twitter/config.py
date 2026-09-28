@@ -9,3 +9,4 @@ class TwitterConfig:
     access_token_secret: str
     retweet_delay: bool = False
     retweet_delay_secs: int = 3
+    use_mock: bool = True

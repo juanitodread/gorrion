@@ -12,28 +12,33 @@ from telegram.ext import (
 from src.gorrion import Gorrion
 from src.config import Config
 from src.clients.spotify import Spotify, NotPlayingError
-from src.clients.twitter import Twitter, TwitterLocal
+from src.clients.twitter import TwitterFactory
+from src.clients.bluesky import BlueskyFactory
 from src.clients.musixmatch import Musixmatch
 
 
 application = ApplicationBuilder().token(Config.TELEGRAM_TOKEN).build()
 
 
-def _new_gorrion(local_mode: bool, delay_mode: bool) -> Gorrion:
+def _new_gorrion(delay_mode: bool) -> Gorrion:
     spotify = Spotify(Config.get_spotify_config())
     musixmatch = Musixmatch(Config.get_musixmatch_config())
 
     twitter_config = Config.get_twitter_config()
     twitter_config.retweet_delay = delay_mode
-    twitter = (TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config))
+    twitter = TwitterFactory.get_client(twitter_config)
 
-    return Gorrion(spotify, twitter, musixmatch)
+    bluesky_config = Config.get_bluesky_config()
+    bluesky_config.replay_delay = delay_mode
+    bluesky = BlueskyFactory.get_client(bluesky_config)
+
+    return Gorrion(spotify, twitter, bluesky, musixmatch)
 
 
 class TelegramBot:
     def __init__(self, gorrion: Gorrion) -> None:
         self._gorrion = gorrion
-        self._commands = ['/start', '/playing', '/lyric', '/album', '/tracks', '/about']
+        self._commands = ['/start', '/playing', '/album', '/tracks', '/about']
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await self._send_message(update, context, 'Welcome to Gorrion Bot 🐦🤖')
@@ -43,16 +48,6 @@ class TelegramBot:
         song = self._gorrion.playing()
 
         await self._send_message(update, context, song.tweet)
-
-    async def playing_with_lyrics(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        tweets = self._gorrion.playing_with_lyrics()
-        song, *lyrics = tweets
-
-        await self._send_message(update, context, song.tweet)
-
-        if lyrics:
-            for lyric in lyrics:
-                await self._send_message(update, context, lyric.tweet)
 
     async def playing_album(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         song = self._gorrion.playing_album()
@@ -109,9 +104,6 @@ def _setup_app(app: Application, bot: TelegramBot) -> Application:
     playing_handler = CommandHandler('playing', bot.playing)
     application.add_handler(playing_handler)
 
-    lyric_handler = CommandHandler('lyric', bot.playing_with_lyrics)
-    application.add_handler(lyric_handler)
-
     album_handler = CommandHandler('album', bot.playing_album)
     application.add_handler(album_handler)
 
@@ -130,7 +122,7 @@ def _setup_app(app: Application, bot: TelegramBot) -> Application:
 
 
 def _do_work_local(event, context) -> None:
-    gorrion = _new_gorrion(local_mode=True, delay_mode=False)
+    gorrion = _new_gorrion(delay_mode=False)
     bot = TelegramBot(gorrion)
 
     app = _setup_app(application, bot)
@@ -138,7 +130,7 @@ def _do_work_local(event, context) -> None:
 
 
 async def _do_work_lambda(event, context) -> dict:
-    gorrion = _new_gorrion(local_mode=False, delay_mode=False)
+    gorrion = _new_gorrion(delay_mode=False)
     bot = TelegramBot(gorrion)
 
     app = _setup_app(application, bot)

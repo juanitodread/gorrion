@@ -88,7 +88,6 @@ class TestTelegramBot:
                 'Supported commands are: \n\n'
                 '/start\n'
                 '/playing\n'
-                '/lyric\n'
                 '/album\n'
                 '/tracks\n'
                 '/about'
@@ -116,7 +115,6 @@ class TestTelegramBot:
                 'Supported commands are: \n\n'
                 '/start\n'
                 '/playing\n'
-                '/lyric\n'
                 '/album\n'
                 '/tracks\n'
                 '/about'
@@ -150,49 +148,6 @@ class TestTelegramBot:
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
         gorrion_mock.return_value.playing.side_effect = SpotifyApiError('error')
-
-        telegram_bot = TelegramBot()
-        telegram_bot.process_event(event)
-
-        bot_mock.return_value.send_message.assert_any_call(
-            chat_id='123',
-            text='error'
-        )
-
-    @patch('src.telegram_bot.Update')
-    @patch('src.telegram_bot.Bot')
-    @patch('src.telegram_bot.Gorrion')
-    def test_process_playing_with_lyrics_command(self, gorrion_mock, bot_mock, update_mock, event):
-        update = MagicMock()
-        update.message.text = '/lyric'
-        update.message.chat.id = '123'
-        update_mock.de_json.return_value = update
-        gorrion_mock.return_value.playing_with_lyrics.return_value = [
-            PublishedTweet(id_='1', tweet='tweet1', entity=None),
-            PublishedTweet(id_='2', tweet='lyric1', entity=None),
-        ]
-
-        telegram_bot = TelegramBot()
-        telegram_bot.process_event(event)
-
-        bot_mock.return_value.send_message.assert_any_call(
-            chat_id='123',
-            text='tweet1'
-        )
-        bot_mock.return_value.send_message.assert_any_call(
-            chat_id='123',
-            text='lyric1'
-        )
-
-    @patch('src.telegram_bot.Update')
-    @patch('src.telegram_bot.Bot')
-    @patch('src.telegram_bot.Gorrion')
-    def test_process_playing_with_lyrics_command_when_error(self, gorrion_mock, bot_mock, update_mock, event):
-        update = MagicMock()
-        update.message.text = '/lyric'
-        update.message.chat.id = '123'
-        update_mock.de_json.return_value = update
-        gorrion_mock.return_value.playing_with_lyrics.side_effect = SpotifyApiError('error')
 
         telegram_bot = TelegramBot()
         telegram_bot.process_event(event)

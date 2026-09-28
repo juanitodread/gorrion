@@ -7,12 +7,18 @@ from src.config import Config
 from src.clients.spotify import Track, Album, Artist
 from src.clients.musixmatch import Song, Lyric
 from src.clients.twitter import TwitterLocal, PublishedTweet
+from src.clients.bluesky import BlueskyLocal
 from src.templates import TweetSongConfig, TweetAlbumConfig
 
 
 @pytest.fixture()
 def twitter():
     return TwitterLocal(Config.get_twitter_config())
+
+
+@pytest.fixture()
+def bluesky():
+    return BlueskyLocal(Config.get_bluesky_config())
 
 
 @pytest.fixture()
@@ -57,14 +63,14 @@ def song():
 
 
 class TestGorrion:
-    def test_constructor(self, twitter):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_constructor(self, twitter, bluesky):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         assert gorrion._spotify is not None
         assert gorrion._twitter is not None
         assert gorrion._musixmatch is not None
 
-    def test_playing(self, twitter, album, song, lyric):
+    def test_playing(self, twitter, bluesky, album, song, lyric):
         spotify_mock = MagicMock()
         spotify_mock.get_current_track.return_value = album
 
@@ -72,8 +78,8 @@ class TestGorrion:
         song.lyric = lyric
         musixmatch_mock.fetch_lyric.return_value = song
 
-        gorrion = Gorrion(spotify_mock, twitter, musixmatch_mock)
-        tweet = gorrion.playing()
+        gorrion = Gorrion(spotify_mock, twitter, bluesky, musixmatch_mock)
+        [tweet, _] = gorrion.playing()
 
         assert tweet == PublishedTweet(
             id_='fake-status-id',
@@ -114,7 +120,7 @@ class TestGorrion:
             )
         )
 
-    def test_playing_with_lyric(self, twitter, album, song, lyric):
+    def test_playing_with_lyric(self, twitter, bluesky, album, song, lyric):
         spotify_mock = MagicMock()
         spotify_mock.get_current_track.return_value = album
 
@@ -122,7 +128,7 @@ class TestGorrion:
         song.lyric = lyric
         musixmatch_mock.fetch_lyric.return_value = song
 
-        gorrion = Gorrion(spotify_mock, twitter, musixmatch_mock)
+        gorrion = Gorrion(spotify_mock, twitter, bluesky, musixmatch_mock)
         tweets = gorrion.playing_with_lyrics()
 
         assert tweets == [
@@ -164,11 +170,9 @@ class TestGorrion:
                     ],
                 )
             ),
-            PublishedTweet(id_='fake-status-id', tweet='lyric1', entity=None),
-            PublishedTweet(id_='fake-status-id', tweet='lyric2', entity=None),
         ]
 
-    def test_playing_album(self, twitter, album, song, lyric):
+    def test_playing_album(self, twitter, bluesky, album, song, lyric):
         spotify_mock = MagicMock()
         spotify_mock.get_current_track.return_value = album
 
@@ -176,8 +180,8 @@ class TestGorrion:
         song.lyric = lyric
         musixmatch_mock.fetch_lyric.return_value = song
 
-        gorrion = Gorrion(spotify_mock, twitter, musixmatch_mock)
-        tweet = gorrion.playing_album()
+        gorrion = Gorrion(spotify_mock, twitter, bluesky, musixmatch_mock)
+        [tweet, _] = gorrion.playing_album()
 
         assert tweet == PublishedTweet(
             id_='fake-status-id',
@@ -219,13 +223,13 @@ class TestGorrion:
             )
         )
 
-    def test_playing_album_with_tracks(self, twitter, album):
+    def test_playing_album_with_tracks(self, twitter, bluesky, album):
         spotify_mock = MagicMock()
         spotify_mock.get_current_album.return_value = album
 
-        gorrion = Gorrion(spotify_mock, twitter, MagicMock())
+        gorrion = Gorrion(spotify_mock, twitter, bluesky, MagicMock())
 
-        tweet = gorrion.playing_album_with_tracks()
+        [tweet, _] = gorrion.playing_album_with_tracks()
 
         assert tweet == [
             PublishedTweet(
@@ -274,13 +278,13 @@ class TestGorrion:
             ),
         ]
 
-    def test_get_lyric(self, twitter, album, song, lyric):
+    def test_get_lyric(self, twitter, bluesky, album, song, lyric):
         musixmatch_mock = MagicMock()
         musixmatch_mock.search_song.return_value = song
         song.lyric = lyric
         musixmatch_mock.fetch_lyric.return_value = song
 
-        gorrion = Gorrion(MagicMock(), twitter, musixmatch_mock)
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, musixmatch_mock)
 
         song = gorrion.get_lyric(album)
 
@@ -290,16 +294,11 @@ class TestGorrion:
             album='Pa morirse de amor',
             tracks=None,
             tracks_length=0,
-            lyric=Lyric(
-                id_='123',
-                track_id='456',
-                common_track_id='789',
-                content=['lyric1', 'lyric2']
-            )
+            lyric=None
         )
 
-    def test_publish_track(self, twitter, album):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_publish_track(self, twitter, bluesky, album):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         track_tweet = gorrion.publish_track(album)
 
@@ -342,8 +341,8 @@ class TestGorrion:
             )
         )
 
-    def test_publish_lyrics(self, twitter, song, lyric):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_publish_lyrics(self, twitter, bluesky, song, lyric):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         published_album = PublishedTweet('1', 'album', None)
         song.lyric = lyric
@@ -354,16 +353,16 @@ class TestGorrion:
             PublishedTweet(id_='fake-status-id', tweet='lyric2', entity=None),
         ]
 
-    def test_publish_lyrics_when_lyric_not_found(self, twitter, song):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_publish_lyrics_when_lyric_not_found(self, twitter, bluesky, song):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         published_album = PublishedTweet('1', 'album', None)
         published_lyrics = gorrion.publish_lyrics(published_album, song)
 
         assert published_lyrics == []
 
-    def test_publish_album(self, twitter, album):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_publish_album(self, twitter, bluesky, album):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         album_tweet = gorrion.publish_album(album)
 
@@ -407,8 +406,8 @@ class TestGorrion:
             )
         )
 
-    def test_publish_tracks(self, twitter, album):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_publish_tracks(self, twitter, bluesky, album):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         album.tracks.append(Track(
             id_='2',
@@ -431,8 +430,8 @@ class TestGorrion:
             ),
         ]
 
-    def test_full_song_status(self, twitter, album):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_full_song_status(self, twitter, bluesky, album):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         status = gorrion.build_status(album, TweetSongConfig())
         assert status == ('Now listening 🔊🎶:\n\n'
@@ -442,9 +441,9 @@ class TestGorrion:
                           '#gorrion #NowPlaying #ElyGuerra\n\n'
                           'http://spotify.com/track/1')
 
-    def test_short_song_status(self, twitter, album):
+    def test_short_song_status(self, twitter, bluesky, album):
         twitter.MAX_TWEET_LENGTH = 10
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         status = gorrion.build_status(album, TweetSongConfig())
         assert status == ('Now listening 🔊🎶:\n\n'
@@ -454,8 +453,8 @@ class TestGorrion:
                           '#gorrion #NowPlaying\n\n'
                           'http://spotify.com/track/1')
 
-    def test_full_album_status(self, twitter, album):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_full_album_status(self, twitter, bluesky, album):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         status = gorrion.build_status(album, TweetAlbumConfig())
         assert status == ('Now listening 🔊🎶:\n\n'
@@ -466,9 +465,9 @@ class TestGorrion:
                           '#gorrion #NowPlaying #PaMorirseDeAmor #ElyGuerra\n\n'
                           'http://spotify.com/album/11?si=g')
 
-    def test_short_album_status(self, twitter, album):
+    def test_short_album_status(self, twitter, bluesky, album):
         twitter.MAX_TWEET_LENGTH = 10
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         status = gorrion.build_status(album, TweetAlbumConfig())
         assert status == ('Now listening 🔊🎶:\n\n'
@@ -479,19 +478,19 @@ class TestGorrion:
                           '#gorrion #NowPlaying #PaMorirseDeAmor\n\n'
                           'http://spotify.com/album/11?si=g')
 
-    def test_is_valid_tweet_status_when_valid_status(self, twitter):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+    def test_is_valid_tweet_status_when_valid_status(self, twitter, bluesky):
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         assert gorrion.is_valid_tweet_status('1' * 280)
 
     def test_is_valid_tweet_status_when_invalid_status(self, twitter):
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
 
         assert not gorrion.is_valid_tweet_status('1' * 281)
 
-    def test_lyrics_to_tweets_short_lyrics(self, twitter):
+    def test_lyrics_to_tweets_short_lyrics(self, twitter, bluesky):
         lyrics = ['lyric1', 'lyric2', 'lyric3']
-        gorrion = Gorrion(MagicMock(), twitter, MagicMock())
+        gorrion = Gorrion(MagicMock(), twitter, bluesky, MagicMock())
         tweets = gorrion.lyrics_to_tweets(lyrics)
 
         assert tweets == ['lyric1', 'lyric2', 'lyric3']

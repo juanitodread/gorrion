@@ -3,7 +3,8 @@ from telegram import Bot, Update
 from src.gorrion import Gorrion
 from src.config import Config
 from src.clients.spotify import Spotify, SpotifyApiError
-from src.clients.twitter import Twitter, TwitterLocal
+from src.clients.twitter import TwitterFactory
+from src.clients.bluesky import BlueskyFactory
 from src.clients.musixmatch import Musixmatch
 
 
@@ -21,12 +22,9 @@ class TelegramBot:
             return
 
         try:
-            gorrion = self._build_gorrion(False, False)
+            gorrion = self._build_gorrion(False)
             if text == '/playing':
                 self.playing(chat_id, gorrion)
-                return
-            if text == '/lyric':
-                self.playing_with_lyrics(chat_id, gorrion)
                 return
             if text == '/album':
                 self.playing_album(chat_id, gorrion)
@@ -58,22 +56,6 @@ class TelegramBot:
             chat_id=chat_id,
             text=song.tweet
         )
-
-    def playing_with_lyrics(self, chat_id: str, gorrion: Gorrion) -> None:
-        tweets = gorrion.playing_with_lyrics()
-        song, *lyrics = tweets
-
-        self._bot.send_message(
-            chat_id=chat_id,
-            text=song.tweet
-        )
-
-        if lyrics:
-            for lyric in lyrics:
-                self._bot.send_message(
-                    chat_id=chat_id,
-                    text=lyric.tweet
-                )
 
     def playing_album(self, chat_id: str, gorrion: Gorrion) -> None:
         song = gorrion.playing_album()
@@ -122,16 +104,19 @@ class TelegramBot:
             text='Sorry 💔. I can only chat with my creator 🧙🏼.'
         )
 
-    def _build_gorrion(self, local_mode: bool, delay_mode: bool) -> Gorrion:
+    def _build_gorrion(self, delay_mode: bool) -> Gorrion:
         spotify = Spotify(Config.get_spotify_config())
         musixmatch = Musixmatch(Config.get_musixmatch_config())
 
         twitter_config = Config.get_twitter_config()
         twitter_config.retweet_delay = delay_mode
-        twitter = (TwitterLocal(twitter_config)
-                   if local_mode else Twitter(twitter_config))
+        twitter = TwitterFactory.get_client(twitter_config)
 
-        return Gorrion(spotify, twitter, musixmatch)
+        bluesky_config = Config.get_bluesky_config()
+        bluesky_config.replay_delay = delay_mode
+        bluesky = BlueskyFactory.get_client(bluesky_config)
+
+        return Gorrion(spotify, twitter, bluesky, musixmatch)
 
     def _is_event_valid(self, event: dict, chat_id: str, text: str) -> bool:
         if not self._is_telegram_owner_sending(event):
@@ -153,7 +138,7 @@ class TelegramBot:
         return True
 
     def _get_commands(self) -> list:
-        return ['/start', '/playing', '/lyric', '/album', '/tracks', '/about']
+        return ['/start', '/playing', '/album', '/tracks', '/about']
 
     def _is_telegram_owner_sending(self, event: dict) -> bool:
         if not Config.TELEGRAM_OWNER_USERNAME:
