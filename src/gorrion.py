@@ -175,7 +175,7 @@ class Gorrion:
 
         if not self.is_valid_bluesky_post_status(tweet_status):
             config.footer_config.with_artists_hashtag = False
-            template = TweetTemplate(album, config)
+            template = BlueskyTemplate(album, config)
             tweet_status = template.to_tweet()
 
         return tweet_status
