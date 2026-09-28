@@ -50,36 +50,35 @@ class TelegramBot:
         )
 
     def playing(self, chat_id: str, gorrion: Gorrion) -> None:
-        song = gorrion.playing()
+        [song, bluesky_song] = gorrion.playing()
 
         self._bot.send_message(
             chat_id=chat_id,
-            text=song.tweet
+            text=bluesky_song.post.build_text()
         )
 
     def playing_album(self, chat_id: str, gorrion: Gorrion) -> None:
-        song = gorrion.playing_album()
+        [album, bluesky_album] = gorrion.playing_album()
 
         self._bot.send_message(
             chat_id=chat_id,
-            text=song.tweet
+            text=bluesky_album.post.build_text()
         )
 
     def playing_album_with_tracks(self, chat_id: str, gorrion: Gorrion) -> None:
-        tweets = gorrion.playing_album_with_tracks()
-        album, *tracks = tweets
+        [tweets, bluesky] = gorrion.playing_album_with_tracks()
+        album, *tracks = bluesky
 
         self._bot.send_message(
             chat_id=chat_id,
-            text=album.tweet
+            text=album.post.build_text()
         )
 
-        if tracks:
-            for track in tracks:
-                self._bot.send_message(
-                    chat_id=chat_id,
-                    text=track.tweet
-                )
+        tracks_tweets = '\n'.join([track.post for track in tracks])
+        self._bot.send_message(
+            chat_id=chat_id,
+            text=tracks_tweets
+        )
 
     def about(self, chat_id: str) -> None:
         self._bot.send_message(

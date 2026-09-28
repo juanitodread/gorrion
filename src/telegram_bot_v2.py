@@ -45,24 +45,23 @@ class TelegramBot:
         await self._send_message(update, context, f'Supported commands are: \n\n{"\n".join(self._commands)}')
 
     async def playing(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        song = self._gorrion.playing()
+        [song, bluesky_song] = self._gorrion.playing()
 
-        await self._send_message(update, context, song.tweet)
+        await self._send_message(update, context, bluesky_song.post.build_text())
 
     async def playing_album(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        song = self._gorrion.playing_album()
+        [album, bluesky_album] = self._gorrion.playing_album()
 
-        await self._send_message(update, context, song.tweet)
+        await self._send_message(update, context, bluesky_album.post.build_text())
 
     async def playing_album_with_tracks(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        tweets = self._gorrion.playing_album_with_tracks()
-        album, *tracks = tweets
+        [tweets, bluesky] = self._gorrion.playing_album_with_tracks()
+        album, *tracks = bluesky
 
-        await self._send_message(update, context, album.tweet)
+        await self._send_message(update, context, album.post.build_text())
 
-        if tracks:
-            for track in tracks:
-                await self._send_message(update, context, track.tweet)
+        tracks_tweets = '\n'.join([track.post for track in tracks])
+        await self._send_message(update, context, tracks_tweets)
 
     async def about(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await self._send_message(update, context, 'Made with ❤️ by @juanitodread')
