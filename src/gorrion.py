@@ -48,7 +48,7 @@ class Gorrion:
         return published_tweet, published_post
 
     def playing_with_lyrics(self) -> list:
-        current_album_tweet = self.playing()
+        [current_album_tweet, _] = self.playing()
 
         song = self.get_lyric(current_album_tweet.entity)
         lyrics_tweets = self.publish_lyrics(current_album_tweet, song)

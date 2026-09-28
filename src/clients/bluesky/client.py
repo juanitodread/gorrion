@@ -53,3 +53,24 @@ class Bluesky:
     @property
     def max_post_length(self) -> int:
         return self.MAX_POST_LENGTH
+
+
+class BlueskyLocal(Bluesky):
+    def __init__(self, config: BlueskyConfig) -> None:
+        super().__init__(config)
+
+    def post(self, text: str) -> PublishedPost:
+        return PublishedPost(
+            cid='cid-123',
+            uri='uri-123',
+            post=text,
+            root_cid='root-cid-123',
+            root_uri='root-uri-123',
+            entity=None,
+        )
+
+    def reply(self, text: str, published_post: PublishedPost) -> PublishedPost:
+        if self._replay_delay:
+            time.sleep(self._replay_delay_secs)
+
+        return self.post(text)

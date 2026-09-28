@@ -34,6 +34,7 @@ class TestBluesky:
             post='tweet status',
             root_cid='http://uri.com',
             root_uri='cid-123',
+            entity=None,
         )
 
     def test_reply(self, bluesky):
@@ -43,6 +44,7 @@ class TestBluesky:
             post='tweet status',
             root_cid='http://uri-321.com',
             root_uri='cid-321',
+            entity=None,
         )
 
         status = bluesky.reply('reply status', root_post)
@@ -53,6 +55,7 @@ class TestBluesky:
             post='reply status',
             root_cid='http://uri-321.com',
             root_uri='cid-321',
+            entity=None,
         )
 
     def test_max_post_length(self, bluesky):
