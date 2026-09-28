@@ -1,9 +1,11 @@
 from unittest.mock import patch, MagicMock
 
 import pytest
+from atproto import client_utils
 
 from src.clients.spotify import SpotifyApiError
 from src.clients.twitter import PublishedTweet
+from src.clients.bluesky import PublishedPost
 from src.config import Config
 from src.telegram_bot import TelegramBot
 
@@ -129,14 +131,24 @@ class TestTelegramBot:
         update.message.text = '/playing'
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
-        gorrion_mock.return_value.playing.return_value.tweet = 'tweet-message'
+        gorrion_mock.return_value.playing.return_value = [
+            'tweet-message',
+            PublishedPost(
+                cid='cid-123',
+                uri='http://uri-123.com',
+                post=client_utils.TextBuilder().text(text='post'),
+                root_cid='cid-456',
+                root_uri='http://uri',
+                entity=None,
+            ),
+        ]
 
         telegram_bot = TelegramBot()
         telegram_bot.process_event(event)
 
         bot_mock.return_value.send_message.assert_any_call(
             chat_id='123',
-            text='tweet-message'
+            text='post'
         )
 
     @patch('src.telegram_bot.Update')
@@ -165,14 +177,24 @@ class TestTelegramBot:
         update.message.text = '/album'
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
-        gorrion_mock.return_value.playing_album.return_value = PublishedTweet(id_='1', tweet='tweet1', entity=None)
+        gorrion_mock.return_value.playing_album.return_value = [
+            PublishedTweet(id_='1', tweet='tweet1', entity=None),
+            PublishedPost(
+                cid='cid-123',
+                uri='http://uri-123.com',
+                post=client_utils.TextBuilder().text(text='post'),
+                root_cid='cid-456',
+                root_uri='http://uri',
+                entity=None,
+            ),
+        ]
 
         telegram_bot = TelegramBot()
         telegram_bot.process_event(event)
 
         bot_mock.return_value.send_message.assert_any_call(
             chat_id='123',
-            text='tweet1'
+            text='post'
         )
 
     @patch('src.telegram_bot.Update')
@@ -201,21 +223,41 @@ class TestTelegramBot:
         update.message.text = '/tracks'
         update.message.chat.id = '123'
         update_mock.de_json.return_value = update
-        gorrion_mock.return_value.playing_album_with_tracks.return_value = [
-            PublishedTweet(id_='1', tweet='album-tweet', entity=None),
-            PublishedTweet(id_='2', tweet='tracks-tweet', entity=None),
-        ]
+        gorrion_mock.return_value.playing_album_with_tracks.return_value = (
+            [
+                PublishedTweet('123', 'album', None),
+                PublishedTweet('123', 'track', None),
+            ],
+            [
+                PublishedPost(
+                    cid='cid-123',
+                    uri='http://uri-123.com',
+                    post=client_utils.TextBuilder().text(text='album'),
+                    root_cid='cid-456',
+                    root_uri='http://uri',
+                    entity=None,
+                ),
+                PublishedPost(
+                    cid='cid-123',
+                    uri='http://uri-123.com',
+                    post='track',
+                    root_cid='cid-456',
+                    root_uri='http://uri',
+                    entity=None,
+                ),
+            ],
+        )
 
         telegram_bot = TelegramBot()
         telegram_bot.process_event(event)
 
         bot_mock.return_value.send_message.assert_any_call(
             chat_id='123',
-            text='album-tweet'
+            text='album'
         )
         bot_mock.return_value.send_message.assert_any_call(
             chat_id='123',
-            text='tracks-tweet'
+            text='track'
         )
 
     @patch('src.telegram_bot.Update')
