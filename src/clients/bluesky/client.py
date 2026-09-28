@@ -57,7 +57,13 @@ class Bluesky:
 
 class BlueskyLocal(Bluesky):
     def __init__(self, config: BlueskyConfig) -> None:
-        super().__init__(config)
+        self.MAX_POST_LENGTH = 280
+        self._replay_delay = config.replay_delay
+        self._replay_delay_secs = config.replay_delay_secs
+
+        self._client = None
+
+        print('Bluesky Mock-Client created!')
 
     def post(self, text: str) -> PublishedPost:
         return PublishedPost(
@@ -74,3 +80,12 @@ class BlueskyLocal(Bluesky):
             time.sleep(self._replay_delay_secs)
 
         return self.post(text)
+
+
+class BlueskyFactory:
+    @staticmethod
+    def get_client(config: BlueskyConfig) -> Bluesky:
+        if config.use_mock:
+            return BlueskyLocal(config)
+        else:
+            return Bluesky(config)

@@ -3,8 +3,8 @@ from argparse import Namespace
 
 from src.config import Config
 from src.clients.spotify import Spotify, SpotifyApiError
-from src.clients.twitter import Twitter, TwitterLocal
-from src.clients.bluesky import Bluesky
+from src.clients.twitter import TwitterFactory
+from src.clients.bluesky import BlueskyFactory
 from src.clients.musixmatch import Musixmatch
 from src.gorrion import Gorrion
 
@@ -90,11 +90,13 @@ class CLI:
 
         twitter_config = Config.get_twitter_config()
         twitter_config.retweet_delay = delay_mode
-        twitter = TwitterLocal(twitter_config) if local_mode else Twitter(twitter_config)
+        twitter_config.use_mock = local_mode
+        twitter = TwitterFactory.get_client(twitter_config)
 
         bluesky_config = Config.get_bluesky_config()
         bluesky_config.replay_delay = delay_mode
-        bluesky = Bluesky(bluesky_config)
+        bluesky_config.use_mock = local_mode
+        bluesky = BlueskyFactory.get_client(bluesky_config)
 
         return Gorrion(spotify, twitter, bluesky, musixmatch)
 

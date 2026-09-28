@@ -57,3 +57,12 @@ class TwitterLocal(Twitter):
         if self._retweet_delay:
             time.sleep(self._retweet_delay_secs)
         return PublishedTweet('fake-status-id', tweet, None)
+
+
+class TwitterFactory:
+    @staticmethod
+    def get_client(config: TwitterConfig) -> Twitter:
+        if config.use_mock:
+            return TwitterLocal(config)
+        else:
+            return Twitter(config)
